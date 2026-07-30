@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String?
+  fullName     String
+  role         Role      @default(USER)
+  googleId     String?   @unique
+  avatarUrl    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  refreshTokens    RefreshToken[]
+  attractions      Attraction[]     @relation("AttractionCreatedBy")
+  reviews          Review[]
+  favorites        Favorite[]
+  reviewHelpfuls   ReviewHelpful[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  revokedAt DateTime?
+
+  @@map("refresh_tokens")
+}
+
+model Category {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  slug        String       @unique
+  description String?
+  icon        String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  attractions Attraction[]
+
+  @@map("categories")
+}
+
+model Attraction {
+  id                     String   @id @default(uuid())
+  name                   String
+  slug                   String   @unique
+  shortDescription       String
+  description            String
+  history                String?
+  district               String
+  address                String
+  latitude               Float
+  longitude              Float
+  openingHours           String
+  entryFee               String
+  contactPhone           String?
+  contactEmail           String?
+  estimatedVisitDuration String?
+  bestVisitingTime       String?
+  safetyInfo             String?
+  accessibilityInfo      String?
+  visitorTips            String?
+  isFeatured             Boolean  @default(false)
+  isPublished            Boolean  @default(true)
+  averageRating          Float    @default(0)
+  reviewCount            Int      @default(0)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  createdById String?
+  createdBy   User?   @relation("AttractionCreatedBy", fields: [createdById], references: [id])
+
+  images    AttractionImage[]
+  reviews   Review[]
+  favorites Favorite[]
+
+  @@index([district])
+  @@index([categoryId])
+  @@map("attractions")
+}
+
+model Review {
+  id            String   @id @default(uuid())
+  rating        Int
+  comment       String
+  helpfulCount  Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attractionId String
+  attraction   Attraction @relation(fields: [attractionId], references: [id], onDelete: Cascade)
+
+  helpfulVotes ReviewHelpful[]
+
+  @@unique([userId, attractionId])
+  @@index([attractionId])
+  @@map("reviews")
+}
+
+model ReviewHelpful {
+  id       String @id @default(uuid())
+  reviewId String
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, userId])
+  @@map("review_helpfuls")
+}
+
+model Favorite {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attractionId String
+  attraction   Attraction @relation(fields: [attractionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, attractionId])
+  @@index([userId])
+  @@map("favorites")
+}
+
+model AttractionImage {
+  id           String     @id @default(uuid())
+  url          String
+  publicId     String?
+  isCover      Boolean    @default(false)
+  altText      String?
+  position     Int        @default(0)
+  createdAt    DateTime   @default(now())
+
+  attractionId String
+  attraction   Attraction @relation(fields: [attractionId], references: [id], onDelete: Cascade)
+
+  @@map("attraction_images")
+}
