@@ -1,0 +1,58 @@
+// Explicit local output — without this, npm workspace hoisting means every
+// service's `prisma generate` writes to the same shared root node_modules,
+// so each service silently overwrites the previous one's client.
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["engagement"]
+}
+
+model Review {
+  id           String   @id @default(uuid())
+  rating       Int
+  comment      String
+  helpfulCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // References User (auth-service) and Attraction (attractions-service) by id only —
+  // no cross-service foreign keys, standard microservices practice.
+  userId       String
+  attractionId String
+
+  helpfulVotes ReviewHelpful[]
+
+  @@unique([userId, attractionId])
+  @@index([attractionId])
+  @@schema("engagement")
+  @@map("reviews")
+}
+
+model ReviewHelpful {
+  id       String @id @default(uuid())
+  reviewId String
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  userId   String
+
+  @@unique([reviewId, userId])
+  @@schema("engagement")
+  @@map("review_helpfuls")
+}
+
+model Favorite {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  userId       String
+  attractionId String
+
+  @@unique([userId, attractionId])
+  @@index([userId])
+  @@schema("engagement")
+  @@map("favorites")
+}

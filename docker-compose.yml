@@ -29,24 +29,76 @@ services:
       timeout: 5s
       retries: 10
 
-  backend:
+  auth-service:
     build:
-      context: ./backend
+      context: ./services/auth-service
     restart: unless-stopped
     env_file:
-      - ./backend/.env
+      - ./services/auth-service/.env
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/visit_yaounde
-      CLIENT_URL: http://localhost:3000
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/visit_yaounde?schema=auth
+      GATEWAY_URL: http://gateway:4000
     ports:
-      - '4000:4000'
+      - '4001:4001'
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
+
+  attractions-service:
+    build:
+      context: ./services/attractions-service
+    restart: unless-stopped
+    env_file:
+      - ./services/attractions-service/.env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/visit_yaounde?schema=attractions
+      GATEWAY_URL: http://gateway:4000
+    ports:
+      - '4002:4002'
+    depends_on:
+      postgres:
         condition: service_healthy
     volumes:
-      - backend_uploads:/app/uploads
+      - attractions_uploads:/app/uploads
+
+  engagement-service:
+    build:
+      context: ./services/engagement-service
+    restart: unless-stopped
+    env_file:
+      - ./services/engagement-service/.env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/visit_yaounde?schema=engagement
+      GATEWAY_URL: http://gateway:4000
+      ATTRACTIONS_SERVICE_URL: http://attractions-service:4002
+      AUTH_SERVICE_URL: http://auth-service:4001
+    ports:
+      - '4003:4003'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      attractions-service:
+        condition: service_started
+
+  gateway:
+    build:
+      context: ./services/gateway
+    restart: unless-stopped
+    env_file:
+      - ./services/gateway/.env
+    environment:
+      CLIENT_URL: http://localhost:3000
+      AUTH_SERVICE_URL: http://auth-service:4001
+      ATTRACTIONS_SERVICE_URL: http://attractions-service:4002
+      ENGAGEMENT_SERVICE_URL: http://engagement-service:4003
+    ports:
+      - '4000:4000'
+    depends_on:
+      - auth-service
+      - attractions-service
+      - engagement-service
 
   frontend:
     build:
@@ -59,9 +111,9 @@ services:
     ports:
       - '3000:3000'
     depends_on:
-      - backend
+      - gateway
 
 volumes:
   postgres_data:
   redis_data:
-  backend_uploads:
+  attractions_uploads:

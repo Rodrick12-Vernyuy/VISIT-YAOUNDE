@@ -4,7 +4,7 @@ node_modules/
 .pnp.js
 
 # Build output
-backend/dist/
+dist/
 frontend/.next/
 frontend/out/
 *.tsbuildinfo
@@ -16,8 +16,10 @@ next-env.d.ts
 !.env.example
 
 # Runtime uploads (local disk image storage fallback)
-backend/uploads/*
-!backend/uploads/.gitkeep
+legacy-monolith/backend/uploads/*
+!legacy-monolith/backend/uploads/.gitkeep
+services/attractions-service/uploads/*
+!services/attractions-service/uploads/.gitkeep
 
 # Logs
 *.log

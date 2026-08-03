@@ -1,0 +1,85 @@
+// Explicit local output — without this, npm workspace hoisting means every
+// service's `prisma generate` writes to the same shared root node_modules,
+// so each service silently overwrites the previous one's client.
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["attractions"]
+}
+
+model Category {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  slug        String       @unique
+  description String?
+  icon        String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  attractions Attraction[]
+
+  @@schema("attractions")
+  @@map("categories")
+}
+
+model Attraction {
+  id                     String   @id @default(uuid())
+  name                   String
+  slug                   String   @unique
+  shortDescription       String
+  description            String
+  history                String?
+  district               String
+  address                String
+  latitude               Float
+  longitude              Float
+  openingHours           String
+  entryFee               String
+  contactPhone           String?
+  contactEmail           String?
+  estimatedVisitDuration String?
+  bestVisitingTime       String?
+  safetyInfo             String?
+  accessibilityInfo      String?
+  visitorTips            String?
+  isFeatured             Boolean  @default(false)
+  isPublished            Boolean  @default(true)
+  averageRating          Float    @default(0)
+  reviewCount            Int      @default(0)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  // References a User in auth-service by id only — no cross-service foreign key.
+  createdById String?
+
+  images AttractionImage[]
+
+  @@index([district])
+  @@index([categoryId])
+  @@schema("attractions")
+  @@map("attractions")
+}
+
+model AttractionImage {
+  id       String   @id @default(uuid())
+  url      String
+  publicId String?
+  isCover  Boolean  @default(false)
+  altText  String?
+  position Int      @default(0)
+  createdAt DateTime @default(now())
+
+  attractionId String
+  attraction   Attraction @relation(fields: [attractionId], references: [id], onDelete: Cascade)
+
+  @@schema("attractions")
+  @@map("attraction_images")
+}

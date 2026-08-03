@@ -2,13 +2,14 @@
   "name": "visit-yaounde",
   "private": true,
   "workspaces": [
-    "backend",
+    "services/gateway",
+    "services/auth-service",
+    "services/attractions-service",
+    "services/engagement-service",
     "frontend"
   ],
   "scripts": {
-    "dev:backend": "npm run dev --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
-    "test:backend": "npm test --workspace=backend",
     "test:frontend": "npm test --workspace=frontend"
   }
 }
