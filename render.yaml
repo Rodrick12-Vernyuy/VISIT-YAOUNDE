@@ -7,8 +7,8 @@ services:
   - type: web
     name: visit-yaounde-backend
     runtime: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    dockerfilePath: ./legacy-monolith/backend/Dockerfile
+    dockerContext: ./legacy-monolith/backend
     plan: free
     healthCheckPath: /health
     envVars:
