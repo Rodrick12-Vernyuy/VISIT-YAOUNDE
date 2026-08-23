@@ -1,9 +1,12 @@
-// Explicit local output — without this, npm workspace hoisting means every
-// service's `prisma generate` writes to the same shared root node_modules,
-// so each service silently overwrites the previous one's client.
+// Generates into .prisma/client (Prisma's recommended location) rather than
+// overwriting @prisma/client directly — newer Prisma CLI versions refuse to
+// generate into a pristine npm-installed @prisma/client package. App code
+// imports the client via src/config/prisma.ts (a relative import, not the
+// bare '@prisma/client' specifier) since npm workspace hoisting means the
+// bare specifier can resolve to a different service's generated client.
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/@prisma/client"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {

@@ -1,5 +1,4 @@
-import { BookingStatus } from '@prisma/client';
-import { prisma } from '../config/prisma';
+import { prisma, BookingStatus } from '../config/prisma';
 
 export const bookingRepository = {
   findByUser(userId: string) {

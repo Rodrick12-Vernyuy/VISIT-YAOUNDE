@@ -1,5 +1,4 @@
-import { prisma } from '../config/prisma';
-import { NotificationType } from '@prisma/client';
+import { prisma, NotificationType } from '../config/prisma';
 
 export const notificationRepository = {
   findByUser(userId: string, { page, pageSize }: { page: number; pageSize: number }) {

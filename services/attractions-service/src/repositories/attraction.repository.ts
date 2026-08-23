@@ -1,5 +1,4 @@
-import { Prisma } from '@prisma/client';
-import { prisma } from '../config/prisma';
+import { prisma, Prisma } from '../config/prisma';
 
 export interface AttractionListFilters {
   q?: string;
