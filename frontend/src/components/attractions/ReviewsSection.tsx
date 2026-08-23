@@ -126,7 +126,7 @@ export function ReviewsSection({
               <div key={review.id} className="rounded-lg border border-border p-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-medium">{review.user.fullName}</p>
+                    <p className="font-medium">{review.user?.fullName ?? 'Visit Yaoundé user'}</p>
                     <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
                       <StarRating value={review.rating} size={14} />
                       {timeAgo(review.createdAt)}

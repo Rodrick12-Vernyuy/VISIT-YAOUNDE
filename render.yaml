@@ -1,16 +1,54 @@
+# Phase 3 cloud deployment — the microservices split from Phase 2, deployed
+# as independent Render web services sharing one Postgres instance (each
+# service owns its own schema — see each service's src/config/env.ts).
+#
+# IMPORTANT — Render free-tier constraint: free services can only *send*
+# private-network traffic, not receive it (that requires a paid plan). So
+# every service here is a public "web" service with its own onrender.com
+# URL, and inter-service calls go over those public URLs rather than a
+# private network. The x-internal-token header (see each service's
+# requireInternalService middleware) is what actually protects the
+# internal-only endpoints — it's an application-level boundary standing in
+# for the network-level isolation a paid plan would give you via Private
+# Services.
+#
+# Also note: Render's free Postgres expires 30 days after creation. Keep an
+# eye on it and recreate (+ re-run migrations, which happen automatically on
+# next boot, and reseed) as needed.
+
 databases:
   - name: visit-yaounde-db
     databaseName: visit_yaounde
     plan: free
 
+envVarGroups:
+  - name: shared-secrets
+    envVars:
+      # Same value everywhere: auth-service issues JWTs, every other
+      # Prisma-backed service verifies them, so they must all agree.
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      # Shared secret for the requireInternalService middleware guarding
+      # each service's /internal/* routes.
+      - key: INTERNAL_SERVICE_TOKEN
+        sync: false
+
 services:
+  # ---------------------------------------------------------------------
+  # Backend microservices
+  # ---------------------------------------------------------------------
+
   - type: web
-    name: visit-yaounde-backend
+    name: visit-yaounde-auth
     runtime: docker
-    dockerfilePath: ./legacy-monolith/backend/Dockerfile
-    dockerContext: ./legacy-monolith/backend
+    dockerfilePath: ./services/auth-service/Dockerfile
+    dockerContext: ./services/auth-service
     plan: free
     healthCheckPath: /health
+    envVarGroups:
+      - shared-secrets
     envVars:
       - key: NODE_ENV
         value: production
@@ -18,25 +56,178 @@ services:
         fromDatabase:
           name: visit-yaounde-db
           property: connectionString
-      - key: JWT_ACCESS_SECRET
-        sync: false
-      - key: JWT_REFRESH_SECRET
-        sync: false
       - key: JWT_ACCESS_TTL
         value: 15m
       - key: JWT_REFRESH_TTL_DAYS
         value: "30"
-      - key: CLOUDINARY_URL
-        sync: false
-      - key: UPLOAD_DIR
-        value: uploads
-      - key: CLIENT_URL
-        sync: false
-      - key: RATE_LIMIT_WINDOW_MS
-        value: "900000"
-      - key: RATE_LIMIT_MAX
-        value: "300"
+      - key: NOTIFICATION_SERVICE_URL
+        value: https://visit-yaounde-notification.onrender.com
       - key: SEED_ADMIN_EMAIL
         value: admin@visityaounde.cm
       - key: SEED_ADMIN_PASSWORD
         sync: false
+
+  - type: web
+    name: visit-yaounde-attractions
+    runtime: docker
+    dockerfilePath: ./services/attractions-service/Dockerfile
+    dockerContext: ./services/attractions-service
+    plan: free
+    healthCheckPath: /health
+    envVarGroups:
+      - shared-secrets
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: visit-yaounde-db
+          property: connectionString
+      # Reuse the same Cloudinary account from Phase 1 — required in
+      # production since the free plan has no persistent disk, so local
+      # /uploads storage doesn't survive a restart or redeploy.
+      - key: CLOUDINARY_URL
+        sync: false
+
+  - type: web
+    name: visit-yaounde-engagement
+    runtime: docker
+    dockerfilePath: ./services/engagement-service/Dockerfile
+    dockerContext: ./services/engagement-service
+    plan: free
+    healthCheckPath: /health
+    envVarGroups:
+      - shared-secrets
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: visit-yaounde-db
+          property: connectionString
+      - key: ATTRACTIONS_SERVICE_URL
+        value: https://visit-yaounde-attractions.onrender.com
+      - key: AUTH_SERVICE_URL
+        value: https://visit-yaounde-auth.onrender.com
+
+  - type: web
+    name: visit-yaounde-notification
+    runtime: docker
+    dockerfilePath: ./services/notification-service/Dockerfile
+    dockerContext: ./services/notification-service
+    plan: free
+    healthCheckPath: /health
+    envVarGroups:
+      - shared-secrets
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: visit-yaounde-db
+          property: connectionString
+
+  - type: web
+    name: visit-yaounde-itinerary
+    runtime: docker
+    dockerfilePath: ./services/itinerary-service/Dockerfile
+    dockerContext: ./services/itinerary-service
+    plan: free
+    healthCheckPath: /health
+    envVarGroups:
+      - shared-secrets
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: visit-yaounde-db
+          property: connectionString
+      - key: ATTRACTIONS_SERVICE_URL
+        value: https://visit-yaounde-attractions.onrender.com
+
+  - type: web
+    name: visit-yaounde-booking
+    runtime: docker
+    dockerfilePath: ./services/booking-service/Dockerfile
+    dockerContext: ./services/booking-service
+    plan: free
+    healthCheckPath: /health
+    envVarGroups:
+      - shared-secrets
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: visit-yaounde-db
+          property: connectionString
+      - key: ATTRACTIONS_SERVICE_URL
+        value: https://visit-yaounde-attractions.onrender.com
+
+  - type: web
+    name: visit-yaounde-search
+    runtime: docker
+    dockerfilePath: ./services/search-service/Dockerfile
+    dockerContext: ./services/search-service
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ATTRACTIONS_SERVICE_URL
+        value: https://visit-yaounde-attractions.onrender.com
+      # Upstash free-tier Redis (rediss:// TLS URL). If left unset, ioredis
+      # fails to connect and search-service falls back to querying
+      # attractions-service directly, uncached — see src/services/search.service.ts.
+      - key: REDIS_URL
+        sync: false
+
+  # ---------------------------------------------------------------------
+  # Gateway + frontend
+  # ---------------------------------------------------------------------
+
+  - type: web
+    name: visit-yaounde-gateway
+    runtime: docker
+    dockerfilePath: ./services/gateway/Dockerfile
+    dockerContext: ./services/gateway
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CLIENT_URL
+        value: https://visit-yaounde-frontend.onrender.com
+      - key: AUTH_SERVICE_URL
+        value: https://visit-yaounde-auth.onrender.com
+      - key: ATTRACTIONS_SERVICE_URL
+        value: https://visit-yaounde-attractions.onrender.com
+      - key: ENGAGEMENT_SERVICE_URL
+        value: https://visit-yaounde-engagement.onrender.com
+      - key: NOTIFICATION_SERVICE_URL
+        value: https://visit-yaounde-notification.onrender.com
+      - key: ITINERARY_SERVICE_URL
+        value: https://visit-yaounde-itinerary.onrender.com
+      - key: SEARCH_SERVICE_URL
+        value: https://visit-yaounde-search.onrender.com
+      - key: BOOKING_SERVICE_URL
+        value: https://visit-yaounde-booking.onrender.com
+
+  - type: web
+    name: visit-yaounde-frontend
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    plan: free
+    envVars:
+      # Baked into the client bundle at build time — Render automatically
+      # forwards service env vars as Docker build args, matching the ARG
+      # declared in frontend/Dockerfile.
+      - key: NEXT_PUBLIC_API_URL
+        value: https://visit-yaounde-gateway.onrender.com/api/v1
+      # Server-only override so Server Components (which run inside this
+      # container) hit the gateway's public URL instead of resolving back
+      # to themselves — see frontend/src/lib/api-server.ts.
+      - key: API_URL
+        value: https://visit-yaounde-gateway.onrender.com/api/v1

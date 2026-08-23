@@ -3,6 +3,7 @@ import { userRepository } from '../repositories/user.repository';
 import { ApiError } from '../utils/ApiError';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { env } from '../config/env';
+import { notificationClient } from '../clients/notificationClient';
 
 function toAuthUser(user: { id: string; email: string; fullName: string; role: 'ADMIN' | 'USER'; avatarUrl: string | null }) {
   return { id: user.id, email: user.email, fullName: user.fullName, role: user.role, avatarUrl: user.avatarUrl };
@@ -25,6 +26,7 @@ export const authService = {
     const passwordHash = await bcrypt.hash(input.password, 12);
     const user = await userRepository.create({ fullName: input.fullName, email: input.email, passwordHash });
     const tokens = await issueTokens(user);
+    void notificationClient.sendWelcome(user.id);
     return { user: toAuthUser(user), ...tokens };
   },
 

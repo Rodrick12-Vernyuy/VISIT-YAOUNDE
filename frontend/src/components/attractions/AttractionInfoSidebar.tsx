@@ -2,6 +2,7 @@ import { Clock, MapPin, Mail, Phone, Ticket, Navigation } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ShareButton } from '@/components/attractions/ShareButton';
+import { googleMapsDirectionsUrl } from '@/lib/geo';
 import type { Attraction } from '@/types';
 
 function Row({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
@@ -17,7 +18,7 @@ function Row({ icon, label, value }: { icon: React.ReactNode; label: string; val
 }
 
 export function AttractionInfoSidebar({ attraction }: { attraction: Attraction }) {
-  const directionsUrl = `https://www.openstreetmap.org/directions?to=${attraction.latitude}%2C${attraction.longitude}`;
+  const directionsUrl = googleMapsDirectionsUrl({ lat: attraction.latitude, lng: attraction.longitude });
 
   return (
     <Card>

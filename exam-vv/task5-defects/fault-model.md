@@ -1,0 +1,27 @@
+# Task 5b — Fault Model
+
+**Registration number: _______________**
+
+## Fault model for Visit Yaoundé
+
+A fault model is a classification of *the kinds of faults this specific application is likely to contain*, derived from its architecture — used to deliberately target test design rather than testing at random. Visit Yaoundé is a multi-service REST system (Express + Prisma + Postgres, split into 4 services communicating over HTTP), so its fault model is built around four fault classes that architecture makes likely:
+
+| Fault class | Why this app is prone to it | How it guided test selection |
+|---|---|---|
+| **1. Input-validation / boundary faults** | Every write endpoint has numeric or length-bounded fields (`rating` 1–5, `comment` 5–2000 chars, pagination `page`/`pageSize`) enforced by hand-written Zod schemas — exactly the kind of code where off-by-one mistakes (`<` vs `<=`, `min` vs `min-1`) hide. | Directly motivated **Task 2's EP/BVA analysis** and test cases TC-02 through TC-09 — every valid-range boundary and its immediate invalid neighbor is tested explicitly, rather than only "one clearly-valid, one clearly-invalid" input. |
+| **2. Cross-service contract faults** | After the Phase 2 microservices split, data that used to come from a single Prisma `include` (e.g. a review's author) now has to be fetched from a *different service* and stitched back together by hand (API composition). Any place that assumed the old single-database shape is a latent fault. | Directly motivated **integration tests INT-01/INT-02** (Task 3), which specifically assert on the *interaction* between `reviewService` and `attractionsClient`/the repository — not just each module in isolation — and is the same class of fault behind DEFECT-02 and the `review.user.fullName` frontend crash described below. |
+| **3. Authorization/ownership faults** | Several mutating endpoints (`update`, `remove`, `toggleHelpful` on reviews) have a compound ownership/role check (`review.userId !== userId && role !== 'ADMIN'`), and compound boolean conditions are a classic place for one branch to go untested. | Directly motivated **TC-10** (unauthenticated access) and **GAP-01** (Task 4) — GAP-01 exists *because* the fault model flagged authorization checks as high-risk, which is what prompted checking the coverage tool for exactly that kind of branch rather than stopping once statement coverage looked reasonable. |
+| **4. Timing/concurrency faults** | JWT signing, in particular, depends on wall-clock time (`iat` at second resolution) and this app issues tokens synchronously on every login — a class of fault that is *not deterministic* and easy to miss with single-shot manual testing. | This class is the reason **DEFECT-01** was found by *rapid repeated* login testing rather than a single login test — informing the general principle applied throughout this campaign: security- and identity-sensitive code paths should be exercised more than once, not just once for "does it work." |
+
+---
+
+## Syntax, semantic, and intermittent errors — with an example each from this app
+
+**Syntax error** — a violation of the language/tool's grammar, caught by a parser/compiler *before* the program can even run; it never reaches execution.
+- *Example:* A malformed Prisma schema (e.g. a missing comma or an unterminated block in `schema.prisma`) causes `npx prisma generate` to fail immediately with a parse error, and TypeScript compile errors caught by `npx tsc --noEmit` (part of every service's `npm run lint`) — e.g. referencing a property that doesn't exist on a typed object — are caught the same way, before any test or the server itself can run.
+
+**Semantic error** — code that is syntactically valid and executes, but computes or assumes the wrong thing — a logic mistake, not a grammar mistake.
+- *Example:* Before the microservices split, `ReviewsSection.tsx` (and the backend serving it) assumed every `Review` object carried a nested `review.user.fullName`, because in the monolith a single Prisma query joined `Review` to `User`. After the split, `Review` and `User` live in different services/schemas with no database-level join — the *code* still compiled and ran, but `review.user` was now `undefined`, and `review.user.fullName` threw `Cannot read properties of undefined (reading 'fullName')` at runtime. The code was syntactically perfect; the assumption baked into it was wrong for the new architecture.
+
+**Intermittent error** — a fault that only manifests under specific, non-deterministic conditions (timing, ordering, concurrency, environment) — the *same* code and the *same* nominal input can pass or fail depending on when/how it runs, which makes this class notoriously hard to reproduce and catch with a single test execution.
+- *Example:* DEFECT-01 above — `signRefreshToken` failed *only* when two logins for the same user happened to fall within the same wall-clock second. Run the login test once, in isolation, with normal human-speed timing between calls, and it passes every time; run it as two rapid-fire calls (as an automated test or a double-click would) and it fails. This is precisely why the fix (`jti: crypto.randomUUID()`) removes the *source of non-determinism* rather than just working around one symptom of it — the general lesson the fault model above encodes as "timing/concurrency-sensitive code needs repeated-execution testing, not single-shot testing."

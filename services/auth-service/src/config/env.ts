@@ -10,11 +10,23 @@ function required(name: string, fallback?: string): string {
   return value;
 }
 
+// Render (and other hosts) give every service the same connection string to
+// a single shared Postgres instance, with no schema selected. Each service
+// owns one fixed schema, so we append it here rather than requiring every
+// deployment target to know how to compose per-service connection strings.
+function withSchema(url: string, schema: string): string {
+  if (/[?&]schema=/.test(url)) return url;
+  return `${url}${url.includes('?') ? '&' : '?'}schema=${schema}`;
+}
+
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   port: parseInt(process.env.PORT ?? '4001', 10),
   gatewayUrl: process.env.GATEWAY_URL ?? 'http://localhost:4000',
-  databaseUrl: required('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5433/visit_yaounde?schema=auth'),
+  databaseUrl: withSchema(
+    required('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5433/visit_yaounde?schema=auth'),
+    'auth'
+  ),
   jwt: {
     accessSecret: required('JWT_ACCESS_SECRET', 'dev-access-secret-change-me'),
     refreshSecret: required('JWT_REFRESH_SECRET', 'dev-refresh-secret-change-me'),
@@ -26,4 +38,5 @@ export const env = {
     max: parseInt(process.env.RATE_LIMIT_MAX ?? '300', 10),
   },
   internalServiceToken: process.env.INTERNAL_SERVICE_TOKEN ?? 'dev-internal-token-change-me',
+  notificationServiceUrl: process.env.NOTIFICATION_SERVICE_URL ?? 'http://localhost:4004',
 };

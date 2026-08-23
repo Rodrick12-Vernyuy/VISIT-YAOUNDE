@@ -40,4 +40,8 @@ proxyRouter.use(proxy('/api/v1/attractions', env.services.attractions));
 proxyRouter.use(proxy('/api/v1/categories', env.services.attractions));
 proxyRouter.use(proxy('/api/v1/reviews', env.services.engagement));
 proxyRouter.use(proxy('/api/v1/favorites', env.services.engagement));
+proxyRouter.use(proxy('/api/v1/notifications', env.services.notification));
+proxyRouter.use(proxy('/api/v1/itineraries', env.services.itinerary));
+proxyRouter.use(proxy('/api/v1/search', env.services.search));
+proxyRouter.use(proxy('/api/v1/bookings', env.services.booking));
 proxyRouter.use(proxy('/uploads', env.services.attractions));

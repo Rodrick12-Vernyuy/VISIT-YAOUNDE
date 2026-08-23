@@ -38,6 +38,7 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/visit_yaounde?schema=auth
       GATEWAY_URL: http://gateway:4000
+      NOTIFICATION_SERVICE_URL: http://notification-service:4004
     ports:
       - '4001:4001'
     depends_on:
@@ -82,6 +83,75 @@ services:
       attractions-service:
         condition: service_started
 
+  notification-service:
+    build:
+      context: ./services/notification-service
+    restart: unless-stopped
+    env_file:
+      - ./services/notification-service/.env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/visit_yaounde?schema=notification
+      GATEWAY_URL: http://gateway:4000
+    ports:
+      - '4004:4004'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  itinerary-service:
+    build:
+      context: ./services/itinerary-service
+    restart: unless-stopped
+    env_file:
+      - ./services/itinerary-service/.env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/visit_yaounde?schema=itinerary
+      GATEWAY_URL: http://gateway:4000
+      ATTRACTIONS_SERVICE_URL: http://attractions-service:4002
+    ports:
+      - '4005:4005'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      attractions-service:
+        condition: service_started
+
+  search-service:
+    build:
+      context: ./services/search-service
+    restart: unless-stopped
+    env_file:
+      - ./services/search-service/.env
+    environment:
+      GATEWAY_URL: http://gateway:4000
+      ATTRACTIONS_SERVICE_URL: http://attractions-service:4002
+      REDIS_URL: redis://redis:6379
+    ports:
+      - '4006:4006'
+    depends_on:
+      redis:
+        condition: service_healthy
+      attractions-service:
+        condition: service_started
+
+  booking-service:
+    build:
+      context: ./services/booking-service
+    restart: unless-stopped
+    env_file:
+      - ./services/booking-service/.env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/visit_yaounde?schema=booking
+      GATEWAY_URL: http://gateway:4000
+      ATTRACTIONS_SERVICE_URL: http://attractions-service:4002
+    ports:
+      - '4007:4007'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      attractions-service:
+        condition: service_started
+
   gateway:
     build:
       context: ./services/gateway
@@ -93,12 +163,20 @@ services:
       AUTH_SERVICE_URL: http://auth-service:4001
       ATTRACTIONS_SERVICE_URL: http://attractions-service:4002
       ENGAGEMENT_SERVICE_URL: http://engagement-service:4003
+      NOTIFICATION_SERVICE_URL: http://notification-service:4004
+      ITINERARY_SERVICE_URL: http://itinerary-service:4005
+      SEARCH_SERVICE_URL: http://search-service:4006
+      BOOKING_SERVICE_URL: http://booking-service:4007
     ports:
       - '4000:4000'
     depends_on:
       - auth-service
       - attractions-service
       - engagement-service
+      - notification-service
+      - itinerary-service
+      - search-service
+      - booking-service
 
   frontend:
     build:
@@ -108,6 +186,7 @@ services:
     restart: unless-stopped
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
+      API_URL: http://gateway:4000/api/v1
     ports:
       - '3000:3000'
     depends_on:

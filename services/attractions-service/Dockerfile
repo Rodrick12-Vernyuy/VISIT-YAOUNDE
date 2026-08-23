@@ -19,4 +19,4 @@ COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 RUN mkdir -p uploads
 EXPOSE 4002
-CMD ["node", "dist/server.js"]
+CMD ["sh", "-c", "node dist/scripts/migrate.js && node dist/server.js"]
