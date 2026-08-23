@@ -47,9 +47,8 @@ services:
     dockerContext: ./services/auth-service
     plan: free
     healthCheckPath: /health
-    envVarGroups:
-      - shared-secrets
     envVars:
+      - fromGroup: shared-secrets
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
@@ -74,9 +73,8 @@ services:
     dockerContext: ./services/attractions-service
     plan: free
     healthCheckPath: /health
-    envVarGroups:
-      - shared-secrets
     envVars:
+      - fromGroup: shared-secrets
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
@@ -96,9 +94,8 @@ services:
     dockerContext: ./services/engagement-service
     plan: free
     healthCheckPath: /health
-    envVarGroups:
-      - shared-secrets
     envVars:
+      - fromGroup: shared-secrets
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
@@ -117,9 +114,8 @@ services:
     dockerContext: ./services/notification-service
     plan: free
     healthCheckPath: /health
-    envVarGroups:
-      - shared-secrets
     envVars:
+      - fromGroup: shared-secrets
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
@@ -134,9 +130,8 @@ services:
     dockerContext: ./services/itinerary-service
     plan: free
     healthCheckPath: /health
-    envVarGroups:
-      - shared-secrets
     envVars:
+      - fromGroup: shared-secrets
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
@@ -153,9 +148,8 @@ services:
     dockerContext: ./services/booking-service
     plan: free
     healthCheckPath: /health
-    envVarGroups:
-      - shared-secrets
     envVars:
+      - fromGroup: shared-secrets
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
