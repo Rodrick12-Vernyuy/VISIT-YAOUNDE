@@ -10,7 +10,15 @@ function setRefreshCookie(res: Response, token: string) {
   res.cookie(REFRESH_COOKIE, token, {
     httpOnly: true,
     secure: isProd,
-    sameSite: 'lax',
+    // Frontend and gateway live on different *.onrender.com subdomains,
+    // which the browser treats as different sites (onrender.com is on the
+    // public suffix list) — so a Lax cookie never gets attached to the
+    // cross-site refresh request, silently failing it every time and
+    // capping every session at the access-token TTL. `none` (only valid
+    // alongside `secure`, hence prod-only) is required for this to work
+    // across subdomains; locally frontend/gateway share `localhost` so
+    // `lax` is fine there.
+    sameSite: isProd ? 'none' : 'lax',
     maxAge: 30 * 24 * 60 * 60 * 1000,
     path: '/api/v1/auth',
   });

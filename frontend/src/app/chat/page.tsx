@@ -5,17 +5,54 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
 const CHAT_WS_URL = process.env.NEXT_PUBLIC_CHAT_WS_URL ?? 'ws://localhost:5000';
+
+type ChatMessage = {
+  id: number;
+  kind: 'own' | 'other' | 'system';
+  sender?: string;
+  text: string;
+};
+
+// Distinct, high-contrast colors so each participant reads as a different
+// person at a glance — picked at random per username, not per message.
+const SENDER_COLORS = [
+  'bg-rose-500',
+  'bg-amber-500',
+  'bg-emerald-500',
+  'bg-sky-500',
+  'bg-violet-500',
+  'bg-fuchsia-500',
+  'bg-orange-500',
+  'bg-teal-500',
+  'bg-indigo-500',
+  'bg-lime-600',
+];
+
+function colorForSender(name: string) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  return SENDER_COLORS[hash % SENDER_COLORS.length];
+}
+
+function parseIncoming(text: string): { sender?: string; text: string; system: boolean } {
+  if (text.startsWith('[')) return { text, system: true };
+  const separator = text.indexOf(': ');
+  if (separator === -1) return { text, system: true };
+  return { sender: text.slice(0, separator), text: text.slice(separator + 2), system: false };
+}
 
 export default function ChatPage() {
   const [username, setUsername] = useState('');
   const [room, setRoom] = useState('general');
   const [connected, setConnected] = useState(false);
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState('');
   const socketRef = useRef<WebSocket | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const nextId = useRef(0);
 
   useEffect(() => {
     return () => socketRef.current?.close();
@@ -24,6 +61,10 @@ export default function ChatPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  function pushMessage(msg: Omit<ChatMessage, 'id'>) {
+    setMessages((prev) => [...prev, { ...msg, id: nextId.current++ }]);
+  }
 
   function joinChat(e: FormEvent) {
     e.preventDefault();
@@ -34,7 +75,7 @@ export default function ChatPage() {
 
     socket.onopen = () => setConnected(true);
     socket.onclose = () => setConnected(false);
-    socket.onerror = () => setMessages((prev) => [...prev, '[Error] Could not reach the chat server.']);
+    socket.onerror = () => pushMessage({ kind: 'system', text: 'Could not reach the chat server.' });
 
     let step = 0;
     socket.onmessage = (event) => {
@@ -46,7 +87,12 @@ export default function ChatPage() {
         socket.send(room.trim() || 'general');
         step = 2;
       } else {
-        setMessages((prev) => [...prev, text]);
+        const parsed = parseIncoming(text);
+        pushMessage(
+          parsed.system
+            ? { kind: 'system', text: parsed.text }
+            : { kind: 'other', sender: parsed.sender, text: parsed.text }
+        );
       }
     };
   }
@@ -55,7 +101,7 @@ export default function ChatPage() {
     e.preventDefault();
     if (!draft.trim() || !socketRef.current) return;
     socketRef.current.send(draft.trim());
-    setMessages((prev) => [...prev, `You: ${draft.trim()}`]);
+    pushMessage({ kind: 'own', text: draft.trim() });
     setDraft('');
   }
 
@@ -85,12 +131,36 @@ export default function ChatPage() {
           </form>
         ) : (
           <>
-            <div className="flex-1 space-y-2 overflow-y-auto pr-1 text-sm">
-              {messages.map((msg, i) => (
-                <p key={i} className="text-foreground">
-                  {msg}
-                </p>
-              ))}
+            <div className="flex-1 space-y-2 overflow-y-auto px-1 py-1">
+              {messages.map((msg) => {
+                if (msg.kind === 'system') {
+                  return (
+                    <p key={msg.id} className="py-1 text-center text-xs text-muted-foreground">
+                      {msg.text}
+                    </p>
+                  );
+                }
+
+                const isOwn = msg.kind === 'own';
+                return (
+                  <div key={msg.id} className={cn('flex', isOwn ? 'justify-end' : 'justify-start')}>
+                    <div className={cn('flex max-w-[75%] flex-col', isOwn ? 'items-end' : 'items-start')}>
+                      {!isOwn && msg.sender && (
+                        <span className="mb-0.5 px-1 text-xs font-medium text-muted-foreground">{msg.sender}</span>
+                      )}
+                      <div
+                        className={cn(
+                          'break-words rounded-2xl px-3 py-2 text-sm text-white shadow-sm',
+                          isOwn ? 'rounded-br-sm bg-primary text-primary-foreground' : 'rounded-bl-sm',
+                          !isOwn && colorForSender(msg.sender ?? '')
+                        )}
+                      >
+                        {msg.text}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
               <div ref={bottomRef} />
             </div>
             <form onSubmit={sendMessage} className="mt-4 flex gap-2">
