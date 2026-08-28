@@ -235,6 +235,8 @@ services:
       # declared in frontend/Dockerfile.
       - key: NEXT_PUBLIC_API_URL
         value: https://visit-yaounde-gateway.onrender.com/api/v1
+      - key: NEXT_PUBLIC_CHAT_WS_URL
+        value: wss://visit-yaounde-chat.onrender.com
       # Server-only override so Server Components (which run inside this
       # container) hit the gateway's public URL instead of resolving back
       # to themselves — see frontend/src/lib/api-server.ts.
