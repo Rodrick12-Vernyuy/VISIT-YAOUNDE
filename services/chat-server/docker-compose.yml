@@ -1,0 +1,9 @@
+services:
+  chat-server:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./logs:/app/logs
+    container_name: chat-server
+    restart: unless-stopped

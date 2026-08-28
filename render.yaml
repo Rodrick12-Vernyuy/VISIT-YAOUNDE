@@ -178,6 +178,21 @@ services:
         sync: false
 
   # ---------------------------------------------------------------------
+  # Chat server (distributed systems lab — WebSocket + asyncio, see
+  # services/chat-server/NOTES.md). Standalone: no DB, no shared secrets,
+  # not proxied through the gateway. Render assigns PORT at runtime; the
+  # server reads it via os.environ (see services/chat-server/server.py).
+  # ---------------------------------------------------------------------
+
+  - type: web
+    name: visit-yaounde-chat
+    runtime: docker
+    dockerfilePath: ./services/chat-server/Dockerfile
+    dockerContext: ./services/chat-server
+    plan: free
+    healthCheckPath: /health
+
+  # ---------------------------------------------------------------------
   # Gateway + frontend
   # ---------------------------------------------------------------------
 

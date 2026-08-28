@@ -152,6 +152,15 @@ services:
       attractions-service:
         condition: service_started
 
+  chat-server:
+    build:
+      context: ./services/chat-server
+    restart: unless-stopped
+    ports:
+      - '5000:5000'
+    volumes:
+      - ./services/chat-server/logs:/app/logs
+
   gateway:
     build:
       context: ./services/gateway
