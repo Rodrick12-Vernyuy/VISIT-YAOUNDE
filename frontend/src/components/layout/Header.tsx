@@ -15,7 +15,6 @@ const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/attractions', label: 'Attractions' },
   { href: '/map', label: 'Live Map' },
-  { href: '/chat', label: 'Chat' },
 ];
 
 export function Header() {

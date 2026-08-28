@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Playfair_Display } from 'next/font/google';
 import { Toaster } from 'sonner';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { ChatFab } from '@/components/layout/ChatFab';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import './globals.css';
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <Header />
             <main className="flex-1">{children}</main>
             <Footer />
+            <ChatFab />
             <Toaster richColors position="top-right" />
           </QueryProvider>
         </ThemeProvider>
