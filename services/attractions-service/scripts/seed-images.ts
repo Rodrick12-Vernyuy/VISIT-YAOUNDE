@@ -46,12 +46,34 @@ const IMAGES_BY_SLUG: Record<string, string[]> = {
     "https://upload.wikimedia.org/wikipedia/commons/8/8f/Centre_international_de_l%27Artisanat_de_Yaound%C3%A9_%281%29.jpg",
     "https://upload.wikimedia.org/wikipedia/commons/9/9d/Centre_international_de_l%27artisanat_de_Yaound%C3%A9_Artisanat_%282%29.jpg",
   ],
+  'blackitude-museum': [
+    'https://commons.wikimedia.org/wiki/Special:FilePath/BLackitude%20Museum.jpg',
+  ],
+  'our-lady-of-victories-cathedral': [
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Cath%C3%A9drale%20Notre-Dame%20Yaound%C3%A9.jpg',
+  ],
+  'basilica-marie-reine-des-apotres': [
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Basilique%20Marie-Reine%20des%20ap%C3%B4tres%20de%20Mvoly%C3%A9.JPG',
+  ],
+  'ahmadou-ahidjo-stadium': [
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Stade%20Ahmadou%20Ahidjo%2C%20Mfandena%2C%20Yaound%C3%A9.jpg',
+  ],
+  'hilton-yaounde': [
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Hilton%20Hotel%20Yaound%C3%A9.JPG',
+  ],
+  'hotel-mont-febe': [
+    'https://upload.wikimedia.org/wikipedia/commons/2/2f/Hotel_Mont_Febe.jpg',
+  ],
+  'les-cascades-du-mfoundi': [
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Les%20Cascades%20du%20Mfoundi%20-%20Yaound%C3%A9%2001.jpg',
+  ],
+  'le-bois-sainte-anastasie': [
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Bois%20Sainte%20Anastasie%2C%20Yaound%C3%A9%2C%20Cameroun.jpg',
+  ],
 };
 
 async function main() {
   const attractions = await prisma.attraction.findMany({ select: { id: true, slug: true } });
-
-  await prisma.attractionImage.deleteMany({});
 
   for (const attraction of attractions) {
     const urls = IMAGES_BY_SLUG[attraction.slug];
@@ -60,14 +82,27 @@ async function main() {
       continue;
     }
 
-    await prisma.attractionImage.createMany({
-      data: urls.map((url, n) => ({
-        attractionId: attraction.id,
-        url,
-        isCover: n === 0,
-        position: n,
-      })),
-    });
+    for (const [position, url] of urls.entries()) {
+      const existing = await prisma.attractionImage.findFirst({
+        where: { attractionId: attraction.id, url },
+      });
+      if (position === 0) {
+        await prisma.attractionImage.updateMany({
+          where: { attractionId: attraction.id, isCover: true },
+          data: { isCover: false },
+        });
+      }
+      if (!existing) {
+        await prisma.attractionImage.create({
+          data: { attractionId: attraction.id, url, isCover: position === 0, position },
+        });
+      } else if (existing.isCover !== (position === 0) || existing.position !== position) {
+        await prisma.attractionImage.update({
+          where: { id: existing.id },
+          data: { isCover: position === 0, position },
+        });
+      }
+    }
   }
 
   console.log(`Seeded images for ${attractions.length} attractions`);

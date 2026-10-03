@@ -2,7 +2,6 @@ export interface LatLng {
   lat: number;
   lng: number;
 }
-
 function toRadians(degrees: number) {
   return (degrees * Math.PI) / 180;
 }
@@ -32,18 +31,31 @@ export function formatDurationSeconds(seconds: number): string {
   return rest ? `${hours}h ${rest}min` : `${hours}h`;
 }
 
-/**
- * Google Maps deep link. Omitting the origin lets Google Maps use the
- * viewer's current location automatically (with their own permission
- * prompt), which is a reliable fallback when in-app geolocation isn't
- * available or the user wants full turn-by-turn navigation.
- */
-export function googleMapsDirectionsUrl(destination: LatLng, origin?: LatLng | null): string {
+/** Returns a human-readable nearby place name without storing the user's location. */
+export async function reverseGeocodeLocation(point: LatLng): Promise<string | null> {
   const params = new URLSearchParams({
-    api: '1',
-    destination: `${destination.lat},${destination.lng}`,
-    travelmode: 'driving',
+    format: 'jsonv2',
+    lat: String(point.lat),
+    lon: String(point.lng),
+    zoom: '16',
+    addressdetails: '1',
   });
-  if (origin) params.set('origin', `${origin.lat},${origin.lng}`);
-  return `https://www.google.com/maps/dir/?${params.toString()}`;
+  try {
+    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${params.toString()}`);
+    if (!response.ok) return null;
+    const result = (await response.json()) as {
+      name?: string;
+      display_name?: string;
+      address?: { road?: string; neighbourhood?: string; suburb?: string; city?: string; town?: string; village?: string };
+    };
+    if (result.name) return result.name;
+
+    const address = result.address;
+    const locality = address?.neighbourhood ?? address?.suburb ?? address?.city ?? address?.town ?? address?.village;
+    if (address?.road && locality) return `${address.road}, ${locality}`;
+    return locality ?? address?.road ?? result.display_name?.split(',').slice(0, 2).join(',') ?? null;
+  } catch {
+    return null;
+  }
 }
+

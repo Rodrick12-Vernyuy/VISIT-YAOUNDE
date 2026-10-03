@@ -8,9 +8,10 @@ import { MapContainer, Marker, Polyline, Popup, TileLayer, useMap } from 'react-
 import { Navigation, LocateFixed, Loader2 } from 'lucide-react';
 import type { Attraction } from '@/types';
 import { useGeolocation } from '@/hooks/useGeolocation';
-import { formatDistanceKm, formatDurationSeconds, googleMapsDirectionsUrl, haversineDistanceKm } from '@/lib/geo';
-import { fetchDrivingRoute, type RouteResult } from '@/lib/routing';
+import { formatDistanceKm, formatDurationSeconds, haversineDistanceKm, reverseGeocodeLocation } from '@/lib/geo';
+import { fetchDrivingRoute, isValidLatLng, type RouteResult } from '@/lib/routing';
 import { Button } from '@/components/ui/button';
+import { AddToItineraryButton } from '@/components/attractions/AddToItineraryButton';
 
 const markerIcon = new L.Icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -38,41 +39,118 @@ interface AttractionMapProps {
   center?: [number, number];
 }
 
-/** Recenters/fits the map whenever the active route or user location changes. */
-function FitBounds({ points }: { points: [number, number][] }) {
+/** Centers on the user or fits the complete road route when one is available. */
+function MapViewport({ userCoords, route }: { userCoords: [number, number] | null; route: RouteResult | null }) {
   const map = useMap();
   useEffect(() => {
-    if (points.length < 2) return;
-    map.fitBounds(points, { padding: [40, 40] });
-  }, [points, map]);
+    if (route?.path.length) {
+      map.fitBounds(route.path, { padding: [40, 40], maxZoom: 15 });
+    } else if (userCoords) {
+      map.setView(userCoords, 14);
+    }
+  }, [map, route, userCoords]);
   return null;
 }
 
-export function AttractionMap({ attractions, height = '480px', zoom = 12, center }: AttractionMapProps) {
+export function AttractionMap({
+  attractions,
+  height = '480px',
+  zoom = 12,
+  center,
+  destinationSlug,
+}: AttractionMapProps & { destinationSlug?: string }) {
   const mapCenter = useMemo(() => center ?? YAOUNDE_CENTER, [center]);
-  const { coords: userCoords, status: locateStatus, locate } = useGeolocation();
-  const [activeRoute, setActiveRoute] = useState<{ attractionId: string; route: RouteResult | null } | null>(null);
-  const [routing, setRouting] = useState<string | null>(null);
+  const { coords: rawUserCoords, status: locateStatus, error: locationError, locate } = useGeolocation();
+  const userCoords = rawUserCoords && isValidLatLng(rawUserCoords) ? rawUserCoords : null;
+  const [selectedDestinationId, setSelectedDestinationId] = useState<string | null>(null);
+  const [activeRoute, setActiveRoute] = useState<{ attractionId: string; route: RouteResult } | null>(null);
+  const [routeError, setRouteError] = useState<string | null>(null);
+  const [userLocationName, setUserLocationName] = useState<string | null>(null);
+  const requestedDestination = destinationSlug
+    ? attractions.find((attraction) => attraction.slug === destinationSlug)
+    : undefined;
+  const routeDestinationId = selectedDestinationId ?? requestedDestination?.id ?? null;
+  const routeDestination = attractions.find((attraction) => attraction.id === routeDestinationId);
+  const destinationError =
+    destinationSlug && attractions.length > 0 && !requestedDestination
+      ? 'This destination could not be found on the map.'
+      : routeDestination && !isValidLatLng({ lat: routeDestination.latitude, lng: routeDestination.longitude })
+        ? 'This destination has invalid coordinates, so directions cannot be calculated.'
+        : null;
 
   async function handleDirections(attraction: Attraction) {
-    if (!userCoords) {
-      locate();
+    const destination = { lat: attraction.latitude, lng: attraction.longitude };
+    if (!isValidLatLng(destination)) {
+      setRouteError('This destination has invalid coordinates, so directions cannot be calculated.');
       return;
     }
-    setRouting(attraction.id);
-    const route = await fetchDrivingRoute(userCoords, { lat: attraction.latitude, lng: attraction.longitude });
-    setActiveRoute({ attractionId: attraction.id, route });
-    setRouting(null);
+    setRouteError(null);
+    setActiveRoute(null);
+    setSelectedDestinationId(attraction.id);
+    // Always refresh the browser position before a new route; do not route
+    // from an older saved coordinate.
+    locate();
   }
 
-  const fitPoints: [number, number][] = activeRoute?.route
-    ? activeRoute.route.path
-    : userCoords
-      ? [
-          [userCoords.lat, userCoords.lng],
-          ...attractions.map((a): [number, number] => [a.latitude, a.longitude]),
-        ]
-      : [];
+  function handleLocateMe() {
+    setUserLocationName(null);
+    locate();
+  }
+
+  useEffect(() => {
+    if (!userCoords) {
+      return;
+    }
+    let cancelled = false;
+    reverseGeocodeLocation(userCoords).then((name) => {
+      if (!cancelled) setUserLocationName(name);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [userCoords]);
+
+  useEffect(() => {
+    if (!routeDestinationId) return;
+    if (!routeDestination || destinationError) return;
+    if (routeError) return;
+    if (locateStatus === 'loading') return;
+    if (!userCoords) {
+      if (locateStatus === 'idle') locate();
+      return;
+    }
+
+    let cancelled = false;
+    fetchDrivingRoute(userCoords, { lat: routeDestination.latitude, lng: routeDestination.longitude })
+      .then((route) => {
+        if (cancelled) return;
+        setActiveRoute({ attractionId: routeDestinationId, route });
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setActiveRoute(null);
+        setRouteError("We couldn't calculate a route to this destination right now. Please try again.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [destinationError, locate, locateStatus, routeDestination, routeDestinationId, routeError, userCoords]);
+
+  const locationMessage =
+    locateStatus === 'unsupported'
+      ? 'Location services are unavailable in this browser.'
+      : locateStatus === 'error'
+        ? locationError
+        : null;
+  const routing = Boolean(
+    routeDestinationId &&
+      !routeError &&
+      !destinationError &&
+      (locateStatus === 'loading' ||
+        (!userCoords && locateStatus === 'idle') ||
+        (userCoords && activeRoute?.attractionId !== routeDestinationId))
+  );
 
   return (
     <div style={{ height }} className="relative overflow-hidden rounded-xl border border-border">
@@ -82,7 +160,7 @@ export function AttractionMap({ attractions, height = '480px', zoom = 12, center
           size="sm"
           variant="secondary"
           className="shadow-md"
-          onClick={locate}
+          onClick={handleLocateMe}
           disabled={locateStatus === 'loading'}
         >
           {locateStatus === 'loading' ? (
@@ -90,14 +168,32 @@ export function AttractionMap({ attractions, height = '480px', zoom = 12, center
           ) : (
             <LocateFixed className="h-4 w-4" />
           )}
-          {userCoords ? 'Update my location' : 'Find my location'}
+          {userCoords ? 'Update my location' : 'Locate Me'}
         </Button>
-        {locateStatus === 'error' && (
-          <p className="mt-1 max-w-[220px] rounded-md bg-background/90 px-2 py-1 text-xs text-destructive shadow-sm">
-            Couldn&apos;t get your location. Check your browser&apos;s location permission.
+        {userCoords && (
+          <p className="mt-2 max-w-64 rounded-md bg-background/95 px-3 py-2 text-xs shadow-md">
+            <span className="font-medium">Your location:</span>{' '}
+            {userLocationName ?? 'Finding the place name...'}
           </p>
         )}
       </div>
+
+      {(routeError || destinationError || locationMessage) && (
+        <p role="alert" className="absolute bottom-3 left-3 right-3 z-[1000] rounded-md bg-background/95 px-3 py-2 text-sm text-destructive shadow-md">
+          {routeError ?? destinationError ?? locationMessage}
+        </p>
+      )}
+      {routing && (
+        <p role="status" className="absolute bottom-3 left-3 z-[1000] rounded-md bg-background/95 px-3 py-2 text-sm shadow-md">
+          Calculating road route…
+        </p>
+      )}
+      {activeRoute?.attractionId === routeDestinationId && !routing && (
+        <p role="status" className="absolute bottom-3 left-3 z-[1000] rounded-md bg-background/95 px-3 py-2 text-sm shadow-md">
+          {formatDistanceKm(activeRoute.route.distanceKm)} · {formatDurationSeconds(activeRoute.route.durationSeconds)} to{' '}
+          {attractions.find((attraction) => attraction.id === activeRoute.attractionId)?.name}
+        </p>
+      )}
 
       <MapContainer center={mapCenter} zoom={zoom} scrollWheelZoom className="h-full w-full">
         <TileLayer
@@ -105,15 +201,21 @@ export function AttractionMap({ attractions, height = '480px', zoom = 12, center
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {fitPoints.length > 1 && <FitBounds points={fitPoints} />}
+        <MapViewport
+          userCoords={userCoords ? [userCoords.lat, userCoords.lng] : null}
+          route={activeRoute?.route ?? null}
+        />
 
         {userCoords && (
           <Marker position={[userCoords.lat, userCoords.lng]} icon={userIcon}>
-            <Popup>You are here</Popup>
+            <Popup>
+              <p className="font-semibold">You are here</p>
+              <p className="mt-1 text-sm text-muted-foreground">{userLocationName ?? 'Finding the name of this location…'}</p>
+            </Popup>
           </Marker>
         )}
 
-        {activeRoute?.route && (
+        {activeRoute?.attractionId === routeDestinationId && (
           <Polyline positions={activeRoute.route.path} pathOptions={{ color: '#3b82f6', weight: 5, opacity: 0.8 }} />
         )}
 
@@ -147,10 +249,10 @@ export function AttractionMap({ attractions, height = '480px', zoom = 12, center
                     <button
                       type="button"
                       onClick={() => handleDirections(attraction)}
-                      disabled={routing === attraction.id}
+                      disabled={(routing && routeDestinationId === attraction.id) || locateStatus === 'loading'}
                       className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline disabled:opacity-60"
                     >
-                      {routing === attraction.id ? (
+                      {routing && routeDestinationId === attraction.id ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : (
                         <Navigation className="h-3.5 w-3.5" />
@@ -158,18 +260,7 @@ export function AttractionMap({ attractions, height = '480px', zoom = 12, center
                       Directions
                     </button>
                   </div>
-
-                  <a
-                    href={googleMapsDirectionsUrl(
-                      { lat: attraction.latitude, lng: attraction.longitude },
-                      userCoords
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block text-xs text-muted-foreground underline underline-offset-2"
-                  >
-                    Open in Google Maps
-                  </a>
+                  <AddToItineraryButton attractionId={attraction.id} className="h-8 px-2 text-xs" />
                 </div>
               </Popup>
             </Marker>

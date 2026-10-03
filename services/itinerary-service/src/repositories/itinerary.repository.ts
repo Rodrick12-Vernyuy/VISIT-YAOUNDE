@@ -5,6 +5,7 @@ export const itineraryRepository = {
     return prisma.itinerary.findMany({
       where: { userId },
       orderBy: { startDate: 'asc' },
+      include: { items: { orderBy: [{ dayNumber: 'asc' }, { order: 'asc' }] } },
     });
   },
 

@@ -84,7 +84,7 @@ export interface PaginatedReviews {
 export interface Favorite {
   id: string;
   createdAt: string;
-  attraction: Attraction;
+  attractionId: string;
 }
 
 export interface PaginatedAttractions {
@@ -103,4 +103,22 @@ export interface AttractionListParams {
   sort?: 'newest' | 'name';
   page?: number;
   pageSize?: number;
+}
+
+export interface ItineraryItem {
+  id: string;
+  attractionId: string;
+  dayNumber: number;
+  order: number;
+  notes: string | null;
+  createdAt: string;
+}
+
+export interface Itinerary {
+  id: string;
+  title: string;
+  description: string | null;
+  startDate: string;
+  endDate: string;
+  items: ItineraryItem[];
 }

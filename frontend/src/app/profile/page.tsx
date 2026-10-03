@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AttractionCard } from '@/components/attractions/AttractionCard';
 import { useFavorites } from '@/lib/queries/favorites';
+import { useAttractions } from '@/lib/queries/attractions';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth.store';
 import type { AuthUser } from '@/types';
@@ -24,6 +25,7 @@ export default function ProfilePage() {
   const accessToken = useAuthStore((state) => state.accessToken);
   const [hydrated, setHydrated] = useState(false);
   const { data: favorites, isLoading: favoritesLoading } = useFavorites();
+  const { data: attractions } = useAttractions({ pageSize: 100 });
 
   const {
     register,
@@ -91,9 +93,10 @@ export default function ProfilePage() {
             <p className="text-sm text-muted-foreground">Loading…</p>
           ) : favorites?.length ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {favorites.map((favorite) => (
-                <AttractionCard key={favorite.id} attraction={favorite.attraction} />
-              ))}
+              {favorites.map((favorite) => {
+                const attraction = attractions?.items.find((item) => item.id === favorite.attractionId);
+                return attraction ? <AttractionCard key={favorite.id} attraction={attraction} /> : null;
+              })}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">

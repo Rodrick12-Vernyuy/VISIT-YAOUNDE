@@ -1,9 +1,10 @@
+# syntax=docker/dockerfile:1.7
 FROM node:22-alpine AS base
 WORKDIR /app
 
 FROM base AS deps
 COPY package*.json ./
-RUN npm install
+RUN --mount=type=cache,id=visit-yaounde-npm,target=/root/.npm,sharing=locked npm install --prefer-offline --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000 --fetch-timeout=300000 --no-audit --no-fund
 
 FROM deps AS build
 ARG NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1

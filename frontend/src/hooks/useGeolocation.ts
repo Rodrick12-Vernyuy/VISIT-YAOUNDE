@@ -34,7 +34,15 @@ export function useGeolocation() {
         });
       },
       (error) => {
-        setState({ coords: null, status: 'error', error: error.message });
+        const message =
+          error.code === error.PERMISSION_DENIED
+            ? 'Location access was denied. Please enable location permission in your browser to use directions.'
+            : error.code === error.POSITION_UNAVAILABLE
+              ? 'Your current location could not be determined. Please check your device location settings and try again.'
+              : error.code === error.TIMEOUT
+                ? 'Your current location could not be determined. Please check your device location settings and try again.'
+                : error.message;
+        setState({ coords: null, status: 'error', error: message });
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     );

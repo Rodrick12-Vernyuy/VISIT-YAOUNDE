@@ -47,6 +47,16 @@ describe('Itineraries', () => {
     expect(res.status).toBe(201);
   });
 
+  it('prevents adding the same attraction twice', async () => {
+    const res = await request(app)
+      .post(`/api/v1/itineraries/${itineraryId}/items`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ attractionId, dayNumber: 1, order: 1 });
+
+    expect(res.status).toBe(409);
+    expect(res.body.message).toContain('already in your itinerary');
+  });
+
   it('fetches the itinerary with its items', async () => {
     const res = await request(app).get(`/api/v1/itineraries/${itineraryId}`).set('Authorization', `Bearer ${token}`);
     expect(res.status).toBe(200);

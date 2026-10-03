@@ -10,6 +10,8 @@ const categories = [
   { name: 'Wildlife', icon: 'paw-print' },
   { name: 'Religious Sites', icon: 'church' },
   { name: 'Cultural Centers', icon: 'palette' },
+  { name: 'Hotels', icon: 'bed-double' },
+  { name: 'Restaurants', icon: 'utensils-crossed' },
   { name: 'Shopping', icon: 'shopping-bag' },
 ];
 
@@ -19,8 +21,9 @@ const attractions = [
     category: 'Monuments',
     district: 'Centre-ville',
     address: 'Boulevard du 20 Mai, Yaoundé',
-    latitude: 3.8657,
-    longitude: 11.5181,
+    // Cameroon heritage inventory (CE03): 3.852394, 11.513604.
+    latitude: 3.852394,
+    longitude: 11.513604,
     shortDescription: 'A striking spiral monument commemorating the 1961 reunification of French and British Cameroon.',
     description:
       'The Reunification Monument is one of Yaoundé\'s most recognizable landmarks, built to celebrate the 1961 reunification of French Cameroun and Southern Cameroons into a single nation. Its sweeping, tusk-like spiral form is covered in bas-relief carvings depicting Cameroonian history, culture, and unity, making it a popular stop for both history lovers and photographers.',
@@ -40,8 +43,9 @@ const attractions = [
     category: 'Museums',
     district: 'Centre-ville',
     address: 'Place du 20 Mai, Yaoundé',
-    latitude: 3.8667,
-    longitude: 11.5194,
+    // Cameroon heritage inventory (CE08): 3.860572, 11.515921.
+    latitude: 3.860572,
+    longitude: 11.515921,
     shortDescription: 'Cameroon\'s national collection of art, artifacts, and history housed in the former presidential palace.',
     description:
       'Located in the former Presidential Palace built in 1932, the National Museum showcases an extensive collection covering Cameroon\'s ethnic diversity, from royal regalia and masks to musical instruments and archaeological finds. Exhibits are organized by region, offering a comprehensive overview of the country\'s more than 250 ethnic groups.',
@@ -80,8 +84,9 @@ const attractions = [
     category: 'Parks & Nature',
     district: 'Bastos',
     address: 'Bastos, Yaoundé',
-    latitude: 3.8901,
-    longitude: 11.5165,
+    // OpenStreetMap location for the garden: 3.871125, 11.5145.
+    latitude: 3.871125,
+    longitude: 11.5145,
     shortDescription: 'A tranquil forested park popular for walking, picnics, and escaping the city bustle.',
     description:
       'Bois Sainte Anastasie is a green, wooded retreat in the upscale Bastos district, offering shaded walking paths, open lawns, and a peaceful escape from Yaoundé\'s busy streets. It is a favorite spot for families, joggers, and anyone looking to relax under the forest canopy.',
@@ -190,6 +195,88 @@ const attractions = [
     estimatedVisitDuration: '1 hour, longer during performances',
     visitorTips: 'Check ahead for scheduled performances — they sell out for popular cultural festivals.',
   },
+  {
+    name: 'Blackitude Museum',
+    category: 'Museums',
+    district: 'Centre-ville',
+    address: 'Behind the Presidential Tribune, Boulevard du 20 Mai, YaoundÃ©',
+    // OpenStreetMap / Wikidata Q15961646: 3.86433, 11.51843.
+    latitude: 3.86433,
+    longitude: 11.51843,
+    shortDescription: 'A private ethnographic museum presenting Cameroonian art, traditions, and cultural heritage.',
+    description: 'Blackitude Museum is an ethnographic museum in central YaoundÃ©, behind the Presidential Tribune on Boulevard du 20 Mai. Its collections introduce visitors to Cameroonian cultural traditions through art objects and heritage displays.',
+    history: 'The museum project began in 1998 and the institution opened in 2000 as a private cultural space dedicated to preserving and sharing Cameroonian heritage.',
+    openingHours: 'Monâ€“Fri, 10:00 AM â€“ 6:00 PM; Sat, 10:00 AM â€“ 2:00 PM',
+    entryFee: 'Contact the museum for current admission information',
+    estimatedVisitDuration: '1â€“2 hours',
+    bestVisitingTime: 'Weekday morning',
+    safetyInfo: 'Located in central YaoundÃ©; follow museum staff guidance during your visit.',
+    accessibilityInfo: 'Contact the museum before visiting for current accessibility arrangements.',
+    visitorTips: 'Call ahead to confirm opening hours and guided-visit availability.',
+    isFeatured: true,
+  },
+  {
+    name: 'Our Lady of Victories Cathedral',
+    category: 'Religious Sites',
+    district: 'Centre-ville',
+    address: 'Rond-point de la Poste Centrale, Yaoundé',
+    latitude: 3.863323,
+    longitude: 11.520966,
+    shortDescription: 'Yaoundé’s landmark Catholic cathedral, recognised as a national monument.',
+    description: 'Our Lady of Victories Cathedral is the seat of the Roman Catholic Archdiocese of Yaoundé, located at the Poste Centrale roundabout in the city centre.',
+    history: 'The cathedral was completed in 1952 and is listed as a monument of Cameroon.',
+    openingHours: 'Hours vary with worship services', entryFee: 'Free', estimatedVisitDuration: '30–45 minutes', bestVisitingTime: 'Daylight hours',
+    safetyInfo: 'Respect services and local dress expectations.', accessibilityInfo: 'Contact the parish for current access arrangements.', visitorTips: 'Check service times before visiting.',
+  },
+  {
+    name: 'Basilica Marie-Reine-des-Apôtres',
+    category: 'Religious Sites', district: 'Mvolyé', address: 'Mvolyé, Yaoundé',
+    latitude: 3.842385, longitude: 11.507664,
+    shortDescription: 'A major Catholic basilica in Mvolyé, one of Yaoundé’s recognised monuments.',
+    description: 'The Basilica Marie-Reine-des-Apôtres is a prominent Catholic church in the Mvolyé neighbourhood of Yaoundé.',
+    history: 'The basilica was inaugurated in 1990 and is listed as a monument of Cameroon.',
+    openingHours: 'Hours vary with worship services', entryFee: 'Free', estimatedVisitDuration: '30–45 minutes', bestVisitingTime: 'Daylight hours',
+    safetyInfo: 'Respect services and local dress expectations.', accessibilityInfo: 'Contact the parish for current access arrangements.', visitorTips: 'Check service times before visiting.',
+  },
+  {
+    name: 'Ahmadou Ahidjo Stadium',
+    category: 'Cultural Centers', district: 'Mfandena', address: 'Mfandena, Yaoundé',
+    latitude: 3.8855, longitude: 11.5405,
+    shortDescription: 'Yaoundé’s principal multi-purpose stadium and a venue for major football matches.',
+    description: 'Ahmadou Ahidjo Stadium is a multi-purpose sports venue in the Mfandena district of Yaoundé, used for football and major national events.',
+    history: 'Opened in 1972, the stadium has hosted international football competitions and Cameroon national-team matches.',
+    openingHours: 'Access varies by event', entryFee: 'Varies by event', estimatedVisitDuration: 'Depends on event', bestVisitingTime: 'During scheduled events',
+    safetyInfo: 'Follow venue entry and event-security instructions.', accessibilityInfo: 'Contact the venue for event-specific accessibility information.', visitorTips: 'Confirm event schedules before travelling.',
+  },
+  {
+    name: 'Hilton Yaoundé',
+    category: 'Hotels', district: 'Centre-ville', address: 'Boulevard du 20 Mai, Yaoundé',
+    latitude: 3.864581, longitude: 11.515669,
+    shortDescription: 'A central Yaoundé hotel on Boulevard du 20 Mai.',
+    description: 'Hilton Yaoundé is a hotel in central Yaoundé on Boulevard du 20 Mai.',
+    history: 'The hotel opened in 1989.',
+    openingHours: '24 hours', entryFee: 'Hotel guests and visitors; rates vary', estimatedVisitDuration: 'Overnight stay', bestVisitingTime: 'Year-round',
+    safetyInfo: 'Use normal hotel check-in and visitor procedures.', accessibilityInfo: 'Contact the hotel for current accessibility details.', visitorTips: 'Confirm rooms and dining directly with the hotel.',
+  },
+  {
+    name: 'Hôtel Mont Fébé',
+    category: 'Hotels', district: 'Mont Fébé', address: 'Mont Fébé, Yaoundé',
+    latitude: 3.91252, longitude: 11.49588,
+    shortDescription: 'A hilltop hotel near Mount Fébé with views over Yaoundé.',
+    description: 'Hôtel Mont Fébé is a hotel on Mount Fébé in Yaoundé, close to the hill’s cultural and leisure sites.',
+    openingHours: '24 hours', entryFee: 'Hotel guests and visitors; rates vary', estimatedVisitDuration: 'Overnight stay', bestVisitingTime: 'Year-round',
+    safetyInfo: 'Use normal hotel check-in and visitor procedures.', accessibilityInfo: 'Contact the hotel for current accessibility details.', visitorTips: 'Confirm accommodation and facility availability directly with the hotel.',
+  },
+  {
+    name: 'Les Cascades du Mfoundi',
+    category: 'Restaurants', district: 'Centre-ville', address: 'Boulevard du 20 Mai, Yaoundé',
+    latitude: 3.868198, longitude: 11.513997,
+    shortDescription: 'A restaurant and leisure venue on Boulevard du 20 Mai.',
+    description: 'Les Cascades du Mfoundi is a Yaoundé restaurant and entertainment venue on Boulevard du 20 Mai.',
+    openingHours: 'Confirm directly with the venue', entryFee: 'Restaurant prices vary', estimatedVisitDuration: '1–2 hours', bestVisitingTime: 'Lunch or evening',
+    safetyInfo: 'Keep personal belongings secure in busy periods.', accessibilityInfo: 'Contact the venue for current accessibility details.', visitorTips: 'Confirm opening hours before visiting.',
+  },
+  {
 ];
 
 async function main() {
@@ -214,7 +301,11 @@ async function main() {
     const slug = slugify(attraction.name, { lower: true, strict: true });
     await prisma.attraction.upsert({
       where: { slug },
-      update: {},
+      update: {
+        latitude: attraction.latitude,
+        longitude: attraction.longitude,
+        address: attraction.address,
+      },
       create: {
         name: attraction.name,
         slug,

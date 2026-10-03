@@ -24,7 +24,9 @@ export function FavoriteButton({ attractionId, className }: { attractionId: stri
       return;
     }
 
-    toggleFavorite.mutate();
+    toggleFavorite.mutate(undefined, {
+      onError: () => toast.error('This location could not be saved right now. Please try again.'),
+    });
   }
 
   return (

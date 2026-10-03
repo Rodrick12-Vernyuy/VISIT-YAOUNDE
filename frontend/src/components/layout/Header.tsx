@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Compass, LogOut, Menu, ShieldCheck, User as UserIcon } from 'lucide-react';
+import { CalendarDays, Compass, LogOut, Menu, ShieldCheck, User as UserIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -44,6 +44,7 @@ export function Header() {
               {link.label}
             </Link>
           ))}
+          {user && <Link href="/trips" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">My Trips</Link>}
           {user?.role === 'ADMIN' && (
             <Link
               href="/admin/attractions"
@@ -112,6 +113,9 @@ export function Header() {
                 <>
                   <Link href="/profile" onClick={() => setMobileOpen(false)} className="text-base font-medium">
                     Profile
+                  </Link>
+                  <Link href="/trips" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 text-base font-medium">
+                    <CalendarDays className="h-4 w-4" /> My Trips
                   </Link>
                   <Button
                     variant="outline"

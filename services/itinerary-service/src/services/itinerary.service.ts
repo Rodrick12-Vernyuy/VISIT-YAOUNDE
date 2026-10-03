@@ -52,7 +52,10 @@ export const itineraryService = {
     userId: string,
     input: { attractionId: string; dayNumber: number; order: number; notes?: string }
   ) {
-    await getOwnedOrThrow(itineraryId, userId);
+    const itinerary = await getOwnedOrThrow(itineraryId, userId);
+    if (itinerary.items.some((item) => item.attractionId === input.attractionId)) {
+      throw ApiError.conflict('This attraction is already in your itinerary.');
+    }
 
     const exists = await attractionsClient.attractionExists(input.attractionId);
     if (!exists) throw ApiError.notFound('Attraction not found');

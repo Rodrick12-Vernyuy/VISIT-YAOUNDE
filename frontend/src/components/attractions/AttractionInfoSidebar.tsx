@@ -1,8 +1,9 @@
 import { Clock, MapPin, Mail, Phone, Ticket, Navigation } from 'lucide-react';
+import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ShareButton } from '@/components/attractions/ShareButton';
-import { googleMapsDirectionsUrl } from '@/lib/geo';
+import { AddToItineraryButton } from '@/components/attractions/AddToItineraryButton';
 import type { Attraction } from '@/types';
 
 function Row({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
@@ -18,8 +19,6 @@ function Row({ icon, label, value }: { icon: React.ReactNode; label: string; val
 }
 
 export function AttractionInfoSidebar({ attraction }: { attraction: Attraction }) {
-  const directionsUrl = googleMapsDirectionsUrl({ lat: attraction.latitude, lng: attraction.longitude });
-
   return (
     <Card>
       <CardContent className="space-y-5 p-6">
@@ -35,10 +34,11 @@ export function AttractionInfoSidebar({ attraction }: { attraction: Attraction }
         {attraction.contactEmail && <Row icon={<Mail className="h-4 w-4" />} label="Email" value={attraction.contactEmail} />}
 
         <Button asChild className="w-full">
-          <a href={directionsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2">
+          <Link href={`/map?destination=${encodeURIComponent(attraction.slug)}`} className="inline-flex items-center justify-center gap-2">
             <Navigation className="h-4 w-4" /> Get directions
-          </a>
+          </Link>
         </Button>
+        <AddToItineraryButton attractionId={attraction.id} className="w-full" />
       </CardContent>
     </Card>
   );

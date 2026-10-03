@@ -17,7 +17,7 @@ export function useFavorites() {
 
 export function useIsFavorited(attractionId: string) {
   const { data: favorites } = useFavorites();
-  return Boolean(favorites?.some((favorite) => favorite.attraction.id === attractionId));
+  return Boolean(favorites?.some((favorite) => favorite.attractionId === attractionId));
 }
 
 export function useToggleFavorite(attractionId: string) {

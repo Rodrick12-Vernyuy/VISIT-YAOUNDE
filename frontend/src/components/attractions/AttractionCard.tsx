@@ -4,6 +4,7 @@ import { Clock, MapPin, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { FavoriteButton } from '@/components/attractions/FavoriteButton';
+import { AddToItineraryButton } from '@/components/attractions/AddToItineraryButton';
 import { resolveImageUrl } from '@/lib/utils';
 import type { Attraction } from '@/types';
 
@@ -11,8 +12,8 @@ export function AttractionCard({ attraction }: { attraction: Attraction }) {
   const cover = attraction.images.find((image) => image.isCover) ?? attraction.images[0];
 
   return (
-    <Link href={`/attractions/${attraction.slug}`} className="group block">
-      <Card className="overflow-hidden transition-shadow hover:shadow-lg">
+    <Card className="group overflow-hidden transition-shadow hover:shadow-lg">
+      <Link href={`/attractions/${attraction.slug}`} className="block">
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
           {cover ? (
             <Image
@@ -50,7 +51,8 @@ export function AttractionCard({ attraction }: { attraction: Attraction }) {
             )}
           </div>
         </CardContent>
-      </Card>
-    </Link>
+      </Link>
+      <div className="px-4 pb-4"><AddToItineraryButton attractionId={attraction.id} className="w-full" /></div>
+    </Card>
   );
 }

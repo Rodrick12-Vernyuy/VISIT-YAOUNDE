@@ -28,7 +28,9 @@ export function createApp(): Express {
     standardHeaders: true,
     legacyHeaders: false,
   });
-  app.use('/api/v1', apiRateLimiter);
+  if (env.nodeEnv !== 'development') {
+    app.use('/api/v1', apiRateLimiter);
+  }
 
   // Proxy routes must come before any body-parsing middleware — the proxy
   // needs to stream the raw request body (including multipart file uploads)
