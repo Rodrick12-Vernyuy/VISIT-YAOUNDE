@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { AttractionGallery } from '@/components/attractions/AttractionGallery';
+import { AttractionVideo } from '@/components/attractions/AttractionVideo';
 import { AttractionInfoSidebar } from '@/components/attractions/AttractionInfoSidebar';
 import { FavoriteButton } from '@/components/attractions/FavoriteButton';
 import { NearbyAttractions } from '@/components/attractions/NearbyAttractions';
@@ -63,6 +64,7 @@ export default async function AttractionDetailPage({ params }: PageProps) {
       </div>
 
       <AttractionGallery images={attraction.images} name={attraction.name} />
+      <AttractionVideo slug={attraction.slug} name={attraction.name} />
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
         <div className="space-y-8 lg:col-span-2">
