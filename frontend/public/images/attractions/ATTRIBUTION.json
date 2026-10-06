@@ -1,0 +1,119 @@
+{
+  "bois-sainte-anastasie": [
+    {
+      "file": "bois-sainte-anastasie-1.jpg",
+      "thumbnail": "bois-sainte-anastasie-1-thumb.jpg",
+      "source": "https://commons.wikimedia.org/wiki/File:Bois_Sainte_Anastasie,_Yaound%C3%A9.JPG",
+      "creator": "Bdx",
+      "licence": "CC BY-SA 4.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "attributionRequired": true,
+      "modified": false,
+      "role": "park view",
+      "verification": "Wikimedia Commons file title identifies Bois Sainte Anastasie, Yaoundé."
+    },
+    {
+      "file": "bois-sainte-anastasie-2.jpg",
+      "thumbnail": "bois-sainte-anastasie-2-thumb.jpg",
+      "source": "https://commons.wikimedia.org/wiki/File:Bois_Sainte_Anastasie_-_Yaound%C3%A9.jpg",
+      "creator": "Fawaz.tairou",
+      "licence": "CC BY-SA 4.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "attributionRequired": true,
+      "modified": false,
+      "role": "park view",
+      "verification": "Wikimedia Commons file title identifies Bois Sainte Anastasie, Yaoundé."
+    },
+    {
+      "file": "bois-sainte-anastasie-3.jpg",
+      "thumbnail": "bois-sainte-anastasie-3-thumb.jpg",
+      "source": "https://commons.wikimedia.org/wiki/File:Bois_Sainte_Anastasie,_Yaound%C3%A9,_Cameroun.jpg",
+      "creator": "Kondah",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "modified": false,
+      "role": "park view",
+      "verification": "Wikimedia Commons file title identifies Bois Sainte Anastasie, Yaoundé."
+    }
+  ],
+  "basilica-marie-reine-des-apotres": [
+    {
+      "file": "basilica-marie-reine-des-apotres-1.webp", "thumbnail": "basilica-marie-reine-des-apotres-1-thumb.webp",
+      "title": "Basilique Marie-Reine des apôtres de Mvolyé 2", "source": "https://commons.wikimedia.org/wiki/File:Basilique_Marie-Reine_des_ap%C3%B4tres_de_Mvoly%C3%A9_2.jpg", "creator": "Steve Mvondo",
+      "licence": "CC BY-SA 3.0", "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0", "attributionRequired": true,
+      "modified": true, "modification": "Resized and converted from the downloaded JPEG to WebP for web delivery.", "role": "basilica exterior",
+      "verification": "Commons title, description, and Basilica Marie-Reine-des-Apôtres category identify the Mvolyé basilica in Yaoundé."
+    },
+    {
+      "file": "basilica-marie-reine-des-apotres-2.webp", "thumbnail": "basilica-marie-reine-des-apotres-2-thumb.webp",
+      "title": "Intérieur Basilique Marie-Reine des apôtres de Mvolyé 2", "source": "https://commons.wikimedia.org/wiki/File:Int%C3%A9rieur_Basilique_Marie-Reine_des_ap%C3%B4tres_de_Mvoly%C3%A9_2.jpg", "creator": "Steve Mvondo",
+      "licence": "CC BY-SA 3.0", "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0", "attributionRequired": true,
+      "modified": true, "modification": "Resized and converted from the downloaded JPEG to WebP for web delivery.", "role": "basilica interior detail",
+      "verification": "Commons title, description, and Basilica Marie-Reine-des-Apôtres category identify the Mvolyé basilica in Yaoundé."
+    },
+    {
+      "file": "basilica-marie-reine-des-apotres-3.webp", "thumbnail": "basilica-marie-reine-des-apotres-3-thumb.webp",
+      "title": "Intérieur Basilique Marie-Reine des apôtres de Mvolyé", "source": "https://commons.wikimedia.org/wiki/File:Int%C3%A9rieur_Basilique_Marie-Reine_des_ap%C3%B4tres_de_Mvoly%C3%A9.jpg", "creator": "Steve Mvondo",
+      "licence": "CC BY-SA 3.0", "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0", "attributionRequired": true,
+      "modified": true, "modification": "Resized and converted from the downloaded JPEG to WebP for web delivery.", "role": "basilica interior wide view",
+      "verification": "Commons title, description, and Basilica Marie-Reine-des-Apôtres category identify the Mvolyé basilica in Yaoundé."
+    }
+  ],
+  "lake-municipal": [
+    { "file":"lake-municipal-1.webp", "thumbnail":"lake-municipal-1-thumb.webp", "title":"Entrée du site du Lac Municipal de Yaounde", "source":"https://commons.wikimedia.org/wiki/File:Entr%C3%A9e_du_site_du_Lac_Municipal_de_Yaounde.jpg", "creator":"Simbanematick", "licence":"CC BY-SA 4.0", "licenceUrl":"https://creativecommons.org/licenses/by-sa/4.0", "attributionRequired":true, "modified":true, "modification":"Resized and converted from the downloaded JPEG to WebP for web delivery.", "role":"lake-site entrance", "verification":"Commons title, description, and Lac Municipal de Yaounde category identify the exact site." },
+    { "file":"lake-municipal-2.webp", "thumbnail":"lake-municipal-2-thumb.webp", "title":"La Vue du Lac Municipal de Yaounde", "source":"https://commons.wikimedia.org/wiki/File:La_Vue_du_Lac_Municipal_de_Yaounde.jpg", "creator":"Simbanematick", "licence":"CC BY-SA 4.0", "licenceUrl":"https://creativecommons.org/licenses/by-sa/4.0", "attributionRequired":true, "modified":true, "modification":"Resized and converted from the downloaded JPEG to WebP for web delivery.", "role":"lakeside view", "verification":"Commons title, description, and Lac Municipal de Yaounde category identify the exact site." },
+    { "file":"lake-municipal-3.webp", "thumbnail":"lake-municipal-3-thumb.webp", "title":"LacMunicipalYaounde", "source":"https://commons.wikimedia.org/wiki/File:LacMunicipalYaounde.jpg", "creator":"Anne Emma POKA", "licence":"CC BY-SA 4.0", "licenceUrl":"https://creativecommons.org/licenses/by-sa/4.0", "attributionRequired":true, "modified":true, "modification":"Resized and converted from the downloaded JPEG to WebP for web delivery.", "role":"municipal lake view", "verification":"Commons description and Lac Municipal de Yaounde category identify Yaoundé Municipal Lake." }
+  ],
+  "mount-febe": [
+    { "file": "mount-febe-1.webp", "thumbnail": "mount-febe-1-thumb.webp", "title": "Végétation sur le Mont Fébé", "source": "https://commons.wikimedia.org/wiki/File:V%C3%A9g%C3%A9tation_sur_le_Mont_F%C3%A9b%C3%A9.jpg", "creator": "ADAMBITA", "licence": "CC BY-SA 4.0", "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0", "attributionRequired": true, "modified": true, "modification": "Resized and converted from the downloaded JPEG to WebP for web delivery.", "role": "mountain vegetation view", "verification": "Commons title and Mont Fébé category identify vegetation on Mount Fébé." },
+    { "file": "mount-febe-2.webp", "thumbnail": "mount-febe-2-thumb.webp", "title": "Yaounde from Febe", "source": "https://commons.wikimedia.org/wiki/File:Yaounde_from_Febe.jpg", "creator": "Emmanuel Taquet", "licence": "CC BY-SA 3.0", "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0", "attributionRequired": true, "modified": true, "modification": "Resized and converted from the downloaded JPEG to WebP for web delivery.", "role": "Yaoundé view from Mount Fébé", "verification": "Commons summary explicitly says Yaoundé viewed from Mount Fébé." },
+    { "file": "mount-febe-3.webp", "thumbnail": "mount-febe-3-thumb.webp", "title": "Yaoundé-Mont Fébé en octobre 1972", "source": "https://commons.wikimedia.org/wiki/File:Yaound%C3%A9-Mont_F%C3%A9b%C3%A9_en_octobre_1972.jpg", "creator": "Jean-Louis Heckly", "licence": "CC BY-SA 4.0", "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0", "attributionRequired": true, "modified": true, "modification": "Resized and converted from the downloaded JPEG to WebP for web delivery.", "role": "historic Mount Fébé view", "verification": "Commons title, description, and Mont Fébé category identify Mount Fébé in Yaoundé." }
+  ],
+  "mvog-betsi-zoo": [
+    {
+      "file": "mvog-betsi-zoo-1.webp", "thumbnail": "mvog-betsi-zoo-1-thumb.webp",
+      "title": "Mvog-Betsi Zoo-Botanical Park", "source": "https://commons.wikimedia.org/wiki/File:Mvog-Betsi_Zoo-Botanical_Park.jpg", "creator": "Eleazar",
+      "licence": "CC BY-SA 3.0", "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0", "attributionRequired": true,
+      "modified": true, "modification": "Resized and converted from the downloaded JPEG to WebP for web delivery.", "role": "zoo entrance",
+      "verification": "Commons description explicitly identifies the entrance to Mvog-Betsi Zoo-Botanical Park in Yaoundé."
+    },
+    {
+      "file": "mvog-betsi-zoo-2.webp", "thumbnail": "mvog-betsi-zoo-2-thumb.webp",
+      "title": "Parc Zoo-Botanique de Mvog-Betsi", "source": "https://commons.wikimedia.org/wiki/File:Parc_Zoo-Botanique_de_Mvog-Betsi.jpg", "creator": "Gtankam",
+      "licence": "CC BY-SA 4.0", "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0", "attributionRequired": true,
+      "modified": true, "modification": "Resized and converted from the downloaded JPEG to WebP for web delivery.", "role": "zoo facade",
+      "verification": "Commons description explicitly identifies the facade of Parc Zoo-Botanique de Mvog-Betsi."
+    },
+    {
+      "file": "mvog-betsi-zoo-3.webp", "thumbnail": "mvog-betsi-zoo-3-thumb.webp",
+      "title": "Parrots in a cage at the Mvogbetsi Botanical Zoo Yaounde", "source": "https://commons.wikimedia.org/wiki/File:Parrots_in_a_cage_at_the_Mvogbetsi_Botanical_Zoo_Yaounde.jpg", "creator": "Holirinyu",
+      "licence": "CC BY-SA 4.0", "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0", "attributionRequired": true,
+      "modified": true, "modification": "Resized and converted from the downloaded JPEG to WebP for web delivery.", "role": "zoo animal enclosure",
+      "verification": "Commons description explicitly identifies parrots at Mvogbetsi Botanical Zoo in Yaoundé."
+    }
+  ],
+  "les-cascades-du-mfoundi": [
+    {
+      "file": "les-cascades-du-mfoundi-1.webp", "thumbnail": "les-cascades-du-mfoundi-1-thumb.webp",
+      "title": "Les Cascades du Mfoundi - Yaoundé 01", "source": "https://commons.wikimedia.org/wiki/File:Les_Cascades_du_Mfoundi_-_Yaound%C3%A9_01.jpg", "creator": "Kondah",
+      "licence": "CC BY-SA 4.0", "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0", "attributionRequired": true,
+      "modified": true, "modification": "Resized and converted from the downloaded JPEG to WebP for web delivery.", "role": "restaurant and leisure-venue environment",
+      "verification": "Commons description identifies the restaurant and attraction venue on Boulevard du 20 Mai, Yaoundé; recorded coordinates match the catalogue location."
+    },
+    {
+      "file": "les-cascades-du-mfoundi-2.webp", "thumbnail": "les-cascades-du-mfoundi-2-thumb.webp",
+      "title": "Les Cascades du Mfoundi - Yaoundé 02", "source": "https://commons.wikimedia.org/wiki/File:Les_Cascades_du_Mfoundi_-_Yaound%C3%A9_02.jpg", "creator": "Kondah",
+      "licence": "CC BY-SA 4.0", "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0", "attributionRequired": true,
+      "modified": true, "modification": "Resized and converted from the downloaded JPEG to WebP for web delivery.", "role": "distinct venue and waterfall view",
+      "verification": "Commons description identifies the restaurant and attraction venue on Boulevard du 20 Mai, Yaoundé; recorded coordinates match the catalogue location."
+    },
+    {
+      "file": "les-cascades-du-mfoundi-3.webp", "thumbnail": "les-cascades-du-mfoundi-3-thumb.webp",
+      "title": "Les Cascades du Mfoundi", "source": "https://commons.wikimedia.org/wiki/File:Les_Cascades_du_Mfoundi.jpg", "creator": "Frederic PAPY",
+      "licence": "CC BY-SA 4.0", "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0", "attributionRequired": true,
+      "modified": true, "modification": "Resized and converted from the downloaded JPEG to WebP for web delivery.", "role": "venue leisure-area view",
+      "verification": "Commons title and description identify Les Cascades du Mfoundi in Yaoundé; recorded coordinates match the catalogue location."
+    }
+  ]
+}

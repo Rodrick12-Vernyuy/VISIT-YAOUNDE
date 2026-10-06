@@ -11,7 +11,7 @@ const ANY = 'any';
 export default function MapPageClient({ destinationSlug }: { destinationSlug?: string }) {
   const [category, setCategory] = useState('');
   const { data: categories } = useCategories();
-  const { data, isLoading } = useAttractions({ category: category || undefined, pageSize: 100 });
+  const { data, isLoading, isError } = useAttractions({ category: category || undefined, pageSize: 100 });
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -37,6 +37,10 @@ export default function MapPageClient({ destinationSlug }: { destinationSlug?: s
 
       {isLoading ? (
         <div className="h-[70vh] w-full animate-pulse rounded-xl bg-muted" />
+      ) : isError ? (
+        <p role="alert" className="py-16 text-center text-destructive">
+          The map attractions could not be loaded. Please refresh the page and try again.
+        </p>
       ) : (
         <AttractionMapClient
           attractions={data?.items ?? []}

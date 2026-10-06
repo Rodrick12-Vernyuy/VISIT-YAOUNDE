@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Expand, X } from 'lucide-react';
 import { useState } from 'react';
-import { cn, resolveImageUrl } from '@/lib/utils';
+import { cn, resolveImageUrl, resolveThumbnailUrl } from '@/lib/utils';
 import type { AttractionImage } from '@/types';
 
 export function AttractionGallery({ images, name }: { images: AttractionImage[]; name: string }) {
@@ -43,7 +43,7 @@ export function AttractionGallery({ images, name }: { images: AttractionImage[];
       </div>
       {sorted.length > 1 && <div className="flex gap-2 overflow-x-auto pb-1" aria-label={`${name} photo gallery`}>
         {sorted.map((image, index) => <button key={image.id} type="button" aria-label={`Show photo ${index + 1}`} aria-current={active.id === image.id} onClick={() => setActiveIndex(index)} className={cn('relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary', active.id === image.id ? 'border-primary' : 'border-transparent', unavailable.includes(image.id) && 'opacity-40')}>
-          <Image src={resolveImageUrl(image.url)} alt="" fill sizes="96px" className="object-cover" onError={() => setUnavailable((current) => (current.includes(image.id) ? current : [...current, image.id]))} />
+          <Image src={resolveThumbnailUrl(image.url)} alt="" fill sizes="96px" className="object-cover" onError={() => setUnavailable((current) => (current.includes(image.id) ? current : [...current, image.id]))} />
         </button>)}
       </div>}
       {isExpanded && availableCount > 0 && <div role="dialog" aria-modal="true" aria-label={`${name} photo viewer`} className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4" onClick={() => setIsExpanded(false)}>

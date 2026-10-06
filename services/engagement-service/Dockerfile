@@ -4,7 +4,7 @@ WORKDIR /app
 
 FROM base AS deps
 COPY package*.json ./
-RUN --mount=type=cache,id=s/cc0b301b-1787-4158-b618-07396c13b9be-/root/.npm,target=/root/.npm,sharing=locked npm install --prefer-offline --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000 --fetch-timeout=300000 --no-audit --no-fund
+RUN --mount=type=cache,id=s/472cd59e-d805-4fd1-8ceb-f2f570e454d6-/root/.npm,target=/root/.npm,sharing=locked npm install --prefer-offline --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000 --fetch-timeout=300000 --no-audit --no-fund
 
 FROM deps AS build
 COPY . .
@@ -14,7 +14,7 @@ RUN npm run build
 FROM base AS runner
 ENV NODE_ENV=production
 COPY package*.json ./
-RUN --mount=type=cache,id=s/cc0b301b-1787-4158-b618-07396c13b9be-/root/.npm,target=/root/.npm,sharing=locked npm install --omit=dev --prefer-offline --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000 --fetch-timeout=300000 --no-audit --no-fund
+RUN --mount=type=cache,id=s/472cd59e-d805-4fd1-8ceb-f2f570e454d6-/root/.npm,target=/root/.npm,sharing=locked npm install --omit=dev --prefer-offline --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000 --fetch-timeout=300000 --no-audit --no-fund
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma

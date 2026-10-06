@@ -276,7 +276,6 @@ const attractions = [
     openingHours: 'Confirm directly with the venue', entryFee: 'Restaurant prices vary', estimatedVisitDuration: '1–2 hours', bestVisitingTime: 'Lunch or evening',
     safetyInfo: 'Keep personal belongings secure in busy periods.', accessibilityInfo: 'Contact the venue for current accessibility details.', visitorTips: 'Confirm opening hours before visiting.',
   },
-  {
 ];
 
 async function main() {

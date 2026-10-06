@@ -48,7 +48,7 @@ export function AttractionsPageClient() {
     [filters.q, filters.category, filters.district, filters.sort, page]
   );
 
-  const { data, isLoading } = useAttractions(queryParams);
+  const { data, isLoading, isError } = useAttractions(queryParams);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -67,7 +67,11 @@ export function AttractionsPageClient() {
       </div>
 
       <div className="mt-8">
-        {view === 'map' ? (
+        {isError ? (
+          <p role="alert" className="py-16 text-center text-destructive">
+            Attractions could not be loaded. Please refresh the page and try again.
+          </p>
+        ) : view === 'map' ? (
           <AttractionMapClient attractions={data?.items ?? []} height="600px" />
         ) : isLoading ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
 import { env } from '../config/env';
-import { syncAttractionMedia } from './sync-attraction-media';
+import { syncLocalMedia } from './sync-local-media';
 
 // Render's Docker services don't support pre-deploy commands, so each
 // container applies its own pending migrations on boot before starting the
@@ -13,9 +13,18 @@ async function main() {
     env: { ...process.env, DATABASE_URL: env.databaseUrl },
   });
 
-  // Production starts backfill missing gallery images. Local development can
-  // opt in explicitly without adding network work to every API restart.
-  if (env.nodeEnv === 'production' || process.env.SYNC_ATTRACTION_MEDIA === 'true') await syncAttractionMedia();
+  // A new Render database contains schema only after `migrate deploy`.
+  // The catalogue seed is idempotent (all records are upserted), so running it
+  // at boot both populates a new deployment and preserves administrator edits.
+  execSync('npx tsx prisma/seed.ts', {
+    stdio: 'inherit',
+    env: { ...process.env, DATABASE_URL: env.databaseUrl },
+  });
+
+  // Media is imported before build and shipped as frontend public assets.
+  // Gate the DB switchover so a deployment can never point at paths whose
+  // files have not yet been committed to the frontend image directory.
+  if (process.env.LOCAL_MEDIA_IMPORTED === 'true') await syncLocalMedia();
 }
 
 main().catch((error) => {

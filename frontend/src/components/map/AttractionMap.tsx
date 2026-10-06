@@ -3,7 +3,7 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer, Marker, Polyline, Popup, TileLayer, useMap } from 'react-leaflet';
 import { Navigation, LocateFixed, Loader2 } from 'lucide-react';
 import type { Attraction } from '@/types';
@@ -65,7 +65,10 @@ export function AttractionMap({
   const [selectedDestinationId, setSelectedDestinationId] = useState<string | null>(null);
   const [activeRoute, setActiveRoute] = useState<{ attractionId: string; route: RouteResult } | null>(null);
   const [routeError, setRouteError] = useState<string | null>(null);
+  const [isRouting, setIsRouting] = useState(false);
   const [userLocationName, setUserLocationName] = useState<string | null>(null);
+  const routeRequestId = useRef(0);
+  const autoRoutedDestination = useRef<string | null>(null);
   const requestedDestination = destinationSlug
     ? attractions.find((attraction) => attraction.slug === destinationSlug)
     : undefined;
@@ -78,23 +81,47 @@ export function AttractionMap({
         ? 'This destination has invalid coordinates, so directions cannot be calculated.'
         : null;
 
-  async function handleDirections(attraction: Attraction) {
+  const requestDirections = useCallback(async (attraction: Attraction) => {
     const destination = { lat: attraction.latitude, lng: attraction.longitude };
     if (!isValidLatLng(destination)) {
       setRouteError('This destination has invalid coordinates, so directions cannot be calculated.');
       return;
     }
+    const requestId = ++routeRequestId.current;
     setRouteError(null);
     setActiveRoute(null);
     setSelectedDestinationId(attraction.id);
-    // Always refresh the browser position before a new route; do not route
-    // from an older saved coordinate.
-    locate();
+    setIsRouting(true);
+
+    // Wait for the fresh GPS result. Reading `userCoords` here could use the
+    // previous React state value and route from the wrong place.
+    const origin = await locate();
+    if (!origin || requestId !== routeRequestId.current) {
+      if (requestId === routeRequestId.current) setIsRouting(false);
+      return;
+    }
+
+    try {
+      const route = await fetchDrivingRoute(origin, destination);
+      if (requestId === routeRequestId.current) {
+        setActiveRoute({ attractionId: attraction.id, route });
+      }
+    } catch {
+      if (requestId === routeRequestId.current) {
+        setRouteError("We couldn't calculate a route to this destination right now. Please try again.");
+      }
+    } finally {
+      if (requestId === routeRequestId.current) setIsRouting(false);
+    }
+  }, [locate]);
+
+  function handleDirections(attraction: Attraction) {
+    void requestDirections(attraction);
   }
 
   function handleLocateMe() {
     setUserLocationName(null);
-    locate();
+    void locate();
   }
 
   useEffect(() => {
@@ -110,32 +137,15 @@ export function AttractionMap({
     };
   }, [userCoords]);
 
+  // The attraction-detail "Get directions" link opens this page with a
+  // destination. Treat it exactly like pressing Directions in a marker popup:
+  // ask for a fresh location before requesting the road route.
   useEffect(() => {
-    if (!routeDestinationId) return;
-    if (!routeDestination || destinationError) return;
-    if (routeError) return;
-    if (locateStatus === 'loading') return;
-    if (!userCoords) {
-      if (locateStatus === 'idle') locate();
-      return;
-    }
-
-    let cancelled = false;
-    fetchDrivingRoute(userCoords, { lat: routeDestination.latitude, lng: routeDestination.longitude })
-      .then((route) => {
-        if (cancelled) return;
-        setActiveRoute({ attractionId: routeDestinationId, route });
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setActiveRoute(null);
-        setRouteError("We couldn't calculate a route to this destination right now. Please try again.");
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [destinationError, locate, locateStatus, routeDestination, routeDestinationId, routeError, userCoords]);
+    if (!destinationSlug || !requestedDestination || destinationError) return;
+    if (autoRoutedDestination.current === destinationSlug) return;
+    autoRoutedDestination.current = destinationSlug;
+    void requestDirections(requestedDestination);
+  }, [destinationError, destinationSlug, requestedDestination, requestDirections]);
 
   const locationMessage =
     locateStatus === 'unsupported'
@@ -143,14 +153,7 @@ export function AttractionMap({
       : locateStatus === 'error'
         ? locationError
         : null;
-  const routing = Boolean(
-    routeDestinationId &&
-      !routeError &&
-      !destinationError &&
-      (locateStatus === 'loading' ||
-        (!userCoords && locateStatus === 'idle') ||
-        (userCoords && activeRoute?.attractionId !== routeDestinationId))
-  );
+  const routing = isRouting && !routeError && !destinationError;
 
   return (
     <div style={{ height }} className="relative overflow-hidden rounded-xl border border-border">

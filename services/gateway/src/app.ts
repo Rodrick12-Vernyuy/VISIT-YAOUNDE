@@ -11,6 +11,13 @@ import { proxyRouter } from './routes/proxy';
 export function createApp(): Express {
   const app = express();
 
+  // Render terminates TLS and forwards requests through one proxy. Without
+  // trusting that single hop, express-rate-limit sees the proxy's IP for every
+  // visitor and eventually blocks the whole deployed site with HTTP 429.
+  // One hop preserves the real client IP from X-Forwarded-For without trusting
+  // arbitrary client-supplied proxy chains.
+  app.set('trust proxy', 1);
+
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
   app.use(cors({ origin: env.clientUrl, credentials: true }));
   app.use(compression());

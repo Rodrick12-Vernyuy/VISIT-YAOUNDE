@@ -27,13 +27,13 @@ envVarGroups:
       # Same value everywhere: auth-service issues JWTs, every other
       # Prisma-backed service verifies them, so they must all agree.
       - key: JWT_ACCESS_SECRET
-        sync: false
+        generateValue: true
       - key: JWT_REFRESH_SECRET
-        sync: false
+        generateValue: true
       # Shared secret for the requireInternalService middleware guarding
       # each service's /internal/* routes.
       - key: INTERNAL_SERVICE_TOKEN
-        sync: false
+        generateValue: true
 
 services:
   # ---------------------------------------------------------------------
@@ -86,6 +86,9 @@ services:
       # /uploads storage doesn't survive a restart or redeploy.
       - key: CLOUDINARY_URL
         sync: false
+      # Only validated, checked-in local galleries are attached on startup.
+      - key: LOCAL_MEDIA_IMPORTED
+        value: "true"
 
   - type: web
     name: visit-yaounde-engagement

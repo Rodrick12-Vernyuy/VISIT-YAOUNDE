@@ -1,7 +1,8 @@
 # Phase 3 — Cloud Deployment
 
-This deploys the Phase 2 microservices split (9 services: gateway, frontend, auth,
-attractions, engagement, notification, itinerary, search, booking) to Render as a
+This deploys the Phase 2 microservices split (9 application services: gateway,
+frontend, auth, attractions, engagement, notification, itinerary, search, booking)
+plus the standalone chat server to Render as a
 [Blueprint](https://render.com/docs/blueprint-spec), replacing the old monolith-only
 deployment. Config lives in [`render.yaml`](./render.yaml).
 
@@ -44,19 +45,16 @@ deployment. Config lives in [`render.yaml`](./render.yaml).
 ## Deploying
 
 1. In the Render dashboard: **New → Blueprint**, connect this repo, select the
-   branch. Render reads `render.yaml` and lists all 10 resources (9 services + 1
+   branch. Render reads `render.yaml` and lists all 11 resources (10 services + 1
    database) it's about to create.
-2. Render will prompt for every `sync: false` value during setup. Have these ready:
-   - `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` — generate two long random strings
-     (e.g. `openssl rand -base64 48`). **Must be entered identically** wherever
-     prompted — these are shared across services via the `shared-secrets`
-     env var group, so Render asks once per group, not once per service.
-   - `INTERNAL_SERVICE_TOKEN` — another random string, same "enter once" behavior.
+2. Render generates the JWT and internal-service secrets once in the shared
+   `shared-secrets` environment group and supplies the same values to every
+   backend service. Have these remaining secret values ready when prompted:
    - `CLOUDINARY_URL` (attractions-service) — from the Cloudinary prerequisite above.
    - `SEED_ADMIN_PASSWORD` (auth-service) — password for the seeded admin account
      (email is `admin@visityaounde.cm` by default, set in `render.yaml`).
    - `REDIS_URL` (search-service) — the Upstash `rediss://` URL, or leave blank.
-3. Click **Apply**. Render builds and deploys all 9 Docker images. First deploy
+3. Click **Apply**. Render builds and deploys all 10 Docker images. First deploy
    takes a while — each service builds independently.
 4. Once live, verify:
    - `https://visit-yaounde-gateway.onrender.com/health` → `{"status":"ok",...}`
@@ -71,8 +69,9 @@ Worth understanding for grading/interview purposes — these are Render free-tie
 constraints, not gaps in the application's design:
 
 - **Cold starts.** Free web services spin down after 15 minutes idle; the first
-  request after that takes ~30–60s while the container restarts. All 9 services
-  spin down independently, so a fully-idle app can feel slow on first load.
+  request after that takes ~30–60s while the container restarts. The gateway and
+  downstream services spin down independently, so a fully-idle app can feel slow
+  on first load.
 - **No real auto-scaling or load balancing.** Render's free plan caps every service
   at a single instance — autoscaling and multi-instance load balancing require a
   paid plan. The architecture is already built for it (stateless services behind a
